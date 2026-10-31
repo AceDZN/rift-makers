@@ -753,10 +753,14 @@ export class SlabView {
   }
 
   dispose() {
+    const mats = new Set<THREE.Material>();
     this.group.traverse((o) => {
       const m = o as THREE.Mesh;
       if (m.geometry) m.geometry.dispose();
+      for (const mat of ([] as THREE.Material[]).concat(m.material ?? [])) mats.add(mat);
     });
+    for (const m of mats) m.dispose();
+    this.smokeTex.dispose();
   }
 }
 

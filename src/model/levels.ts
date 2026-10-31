@@ -66,7 +66,7 @@ export interface LevelDef {
   key: string;
   title: string;
   module: string;
-  tag: 'הדרכה' | 'קל' | 'בינוני' | 'מאתגר' | 'העברה' | 'גמר';
+  tag: 'הדרכה' | 'קל' | 'בינוני' | 'מאתגר' | 'העברה' | 'גמר' | 'הזמנה';
   kind: Kind;
   intro: string;
   goal: string;
@@ -150,7 +150,7 @@ export interface IsraelLevel {
 
 // ───────── helpers ─────────
 
-const green = (w: number, d: number, shapes: Shape[] = [], seed = 3): BaseSpec => ({
+export const green = (w: number, d: number, shapes: Shape[] = [], seed = 3): BaseSpec => ({
   widthKm: w,
   depthKm: d,
   elev: 320,
@@ -161,7 +161,7 @@ const green = (w: number, d: number, shapes: Shape[] = [], seed = 3): BaseSpec =
   seed,
 });
 
-const hill = (x: number, z: number, r: number, h: number, mat: number = MAT.rock): Shape => ({
+export const hill = (x: number, z: number, r: number, h: number, mat: number = MAT.rock): Shape => ({
   geom: { kind: 'circle', x, z, r, soft: r },
   add: h,
   profile: 'cone',
@@ -169,7 +169,7 @@ const hill = (x: number, z: number, r: number, h: number, mat: number = MAT.rock
 });
 
 /** Two plates split by a north–south seam at x. */
-function splitNS(w: number, d: number, x: number, west: Plate['crust'] = 'continental', east: Plate['crust'] = 'continental', names = ['הלוח המערבי', 'הלוח המזרחי']) {
+export function splitNS(w: number, d: number, x: number, west: Plate['crust'] = 'continental', east: Plate['crust'] = 'continental', names = ['הלוח המערבי', 'הלוח המזרחי']) {
   const plates: Plate[] = [
     { id: 'W', he: names[0], poly: rectPoly(-1, -1, x, d + 1), crust: west },
     { id: 'E', he: names[1], poly: rectPoly(x, -1, w + 1, d + 1), crust: east },
@@ -920,8 +920,14 @@ export const WORLDS = [
   { id: 4, he: 'סלעים וארץ ישראל', en: 'Rocks and the Land of Israel' },
 ] as const;
 
+/** Levels made after the authored 18 (planet commissions) register here. */
+const EXTRA = new Map<number, LevelDef>();
+export function registerLevel(d: LevelDef) {
+  EXTRA.set(d.id, d);
+}
+
 export function levelById(id: number): LevelDef {
-  const l = LEVELS.find((x) => x.id === id);
+  const l = LEVELS.find((x) => x.id === id) ?? EXTRA.get(id);
   if (!l) throw new Error(`no level ${id}`);
   return l;
 }

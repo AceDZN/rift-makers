@@ -138,6 +138,7 @@ export class Actor {
 
 /** A floating green "413" shield over a reinforced house (the model has no text). */
 export function badge413(): THREE.Sprite {
+  if (badgeTex) return badgeSprite(badgeTex);
   const c = document.createElement('canvas');
   c.width = 96;
   c.height = 112;
@@ -161,6 +162,13 @@ export function badge413(): THREE.Sprite {
   g.fillText('413', 48, 66);
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
+  badgeTex = t;
+  return badgeSprite(t);
+}
+
+let badgeTex: THREE.Texture | null = null;
+
+function badgeSprite(t: THREE.Texture) {
   const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, depthTest: false }));
   sp.scale.set(0.16, 0.19, 1);
   return sp;

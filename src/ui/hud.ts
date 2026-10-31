@@ -3,6 +3,7 @@
 
 import type { Game } from '../game/game.ts';
 import { LEVELS, WORLDS } from '../model/levels.ts';
+import { COMMISSION_LEVELS } from '../model/commissions.ts';
 import { LAYERS } from '../model/earth.ts';
 import { isUnlocked } from '../game/progress.ts';
 import { ROCK_HE } from '../model/rocks.ts';
@@ -110,7 +111,7 @@ export class Hud {
     const top = this.el('div', 'topbar');
     const title = this.el('div', 'title-card');
     const best = g.progress.stars[s.def.id] ?? 0;
-    title.innerHTML = `<div class="title-row"><span>${ltr(s.def.id)}. ${s.def.title}</span><span class="stars" aria-label="${best} כוכבים">${starsHtml(s.outcome?.stars ?? best)}</span></div><div class="goal">${s.def.goal}</div>`;
+    title.innerHTML = `<div class="title-row"><span>${s.def.id > 100 ? '' : ltr(s.def.id) + '. '}${s.def.title}</span><span class="stars" aria-label="${best} כוכבים">${starsHtml(s.outcome?.stars ?? best)}</span></div><div class="goal">${s.def.goal}</div>`;
     top.appendChild(title);
     const btns = this.el('div', 'round-btns');
     btns.appendChild(this.button('rbtn', ICON.pause + '<span class="cap">עצירה</span>', () => {
@@ -407,9 +408,13 @@ export class Hud {
     c.setAttribute('role', 'dialog');
     c.innerHTML = `<div class="bigstars" aria-label="${s.outcome!.stars} כוכבים">${starsHtml(s.outcome!.stars)}</div><h2>הצלחה!</h2><p>${s.outcome!.line}</p>${s.hints ? '<p class="note">רמז אחד עלה כוכב.</p>' : ''}`;
     const row = this.el('div', 'row');
-    const next = s.def.id < LEVELS.length ? s.def.id + 1 : null;
-    if (next) row.appendChild(this.button('btn primary', 'לשלב הבא', () => g.startLevel(next)));
-    else row.appendChild(this.button('btn primary', 'בניתם את ארץ ישראל! לבחירת שלב', () => g.exitToSelect()));
+    const id = s.def.id;
+    const next = id < LEVELS.length || COMMISSION_LEVELS.some((l) => l.id === id + 1) ? id + 1 : null;
+    if (next) row.appendChild(this.button('btn primary', id > 100 ? 'להזמנה הבאה' : 'לשלב הבא', () => g.startLevel(next)));
+    else if (id === LEVELS.length) {
+      row.appendChild(this.button('btn primary', 'בניתם את ארץ ישראל! לבחירת שלב', () => g.exitToSelect()));
+      if (COMMISSION_LEVELS.length) row.appendChild(this.button('btn', 'הזמנות כוכב חדשות', () => g.startLevel(COMMISSION_LEVELS[0].id)));
+    } else row.appendChild(this.button('btn primary', 'כל ההזמנות הושלמו! לבחירת שלב', () => g.exitToSelect()));
     row.appendChild(this.button('btn', 'שוב', () => g.startLevel(s.def.id)));
     row.appendChild(this.button('btn', 'לבחירת שלב', () => g.exitToSelect()));
     c.appendChild(row);
@@ -479,13 +484,28 @@ export class Hud {
       }
       worlds.appendChild(box);
     }
+    if (COMMISSION_LEVELS.length) {
+      const open = isUnlocked(g.progress, COMMISSION_LEVELS[0].id);
+      const box = this.el('div', 'world commissions', `<h3>הזמנות כוכב <span class="en ltr">Planet commissions</span></h3><p class="note">${open ? 'שלבים שנוצרו במחשב ונבדקו שיש להם פתרון.' : 'נפתחות אחרי שלב הגמר.'}</p>`);
+      for (const l of COMMISSION_LEVELS) {
+        const st = g.progress.stars[l.id] ?? 0;
+        const b = this.button(
+          'lvl',
+          `<span class="num">${ltr(open ? l.id - 100 : '🔒')}</span><span class="name">${l.title}<span class="tag">${l.tag}</span></span><span class="st">${starsHtml(st)}</span>`,
+          () => g.startLevel(l.id),
+          { disabled: !open, label: `${l.title}${open ? '' : ', נעול'}` },
+        );
+        box.appendChild(b);
+      }
+      worlds.appendChild(box);
+    }
     wrap.appendChild(worlds);
     const row = this.el('div', 'row');
     row.style.justifyContent = 'center';
     // continue at the first open level without stars, else the last open one
     const open = LEVELS.filter((l) => isUnlocked(g.progress, l.id));
     const next = open.find((l) => !(g.progress.stars[l.id] ?? 0)) ?? open[open.length - 1];
-    const total = Object.values(g.progress.stars).reduce((a, b) => a + b, 0);
+    const total = LEVELS.reduce((a, l) => a + (g.progress.stars[l.id] ?? 0), 0);
     row.appendChild(this.el('span', 'total-stars', `<span aria-hidden="true">★</span> <span class="ltr">${total}/${LEVELS.length * 3}</span>`));
     row.appendChild(this.button('btn primary big', `${total ? 'המשך' : 'מתחילים'} · שלב ${ltr(next.id)}`, () => g.startLevel(next.id)));
     row.appendChild(this.button('btn', g.audio.muted ? 'הפעלת צליל' : 'השתקה', () => g.toggleMute()));

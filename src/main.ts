@@ -3,6 +3,7 @@ import { Game } from './game/game.ts';
 import { Hud } from './ui/hud.ts';
 import { initHost, parseLevelParam, postToHost } from './host.ts';
 import { LEVELS } from './model/levels.ts';
+import { COMMISSION_BASE_ID, COMMISSION_LEVELS } from './model/commissions.ts';
 
 declare global {
   interface Window {
@@ -33,8 +34,9 @@ window.addEventListener('keydown', (e) => {
   game.key(e);
 });
 
-const deep = parseLevelParam(location.search, LEVELS.length);
-if (deep !== null) game.startLevel(deep + 1);
+const deep = parseLevelParam(location.search, COMMISSION_BASE_ID + COMMISSION_LEVELS.length);
+const deepOk = deep !== null && (deep < LEVELS.length || deep >= COMMISSION_BASE_ID);
+if (deepOk) game.startLevel(deep + 1);
 else game.exitToSelect();
 
 let manual = false;

@@ -34,8 +34,12 @@ Played level 1 by hand in the browser pane (success, mistake, hint, restart, dra
 
 README, LEVELS.md verified solutions, `tests/rules.test.ts` (rate × time, sea-floor age, rocks, level-17 sea level), visual review, playtest report.
 
+## 7. Models in every level, planet commissions
+
+- The remaining Tripo models now appear where their story is: observatory (8, 11), seismograph stations (12, 13, 15), a dog that bolts in quakes (13, 15), warning tower (14), ammonite (17), hot spring (18).
+- Planet commissions: `scripts/gen-commissions.ts` proposes sea, mountain and arc layouts and brute-forces every heat kind, position (40 km grid) and duration; it keeps a layout only when something wins and at most 15% of tries win. They unlock after the final and are re-checked by `tests/commissions.test.ts`.
+
 ## Open
 
-- Planet commissions (generated, solver-checked levels after the 18).
 - Rivers and a fed Kinneret.
 - Recorded sound effects.

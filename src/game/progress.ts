@@ -39,8 +39,9 @@ export function saveProgress(p: Progress) {
   }
 }
 
-/** Level n is open when level n−1 has a star (level 1 always). */
+/** Level n is open when level n−1 has a star (level 1 always); commissions (id > 100) open after the final. */
 export function isUnlocked(p: Progress, id: number): boolean {
+  if (id > 100) return (p.stars[18] ?? 0) > 0;
   return id === 1 || (p.stars[id - 1] ?? 0) > 0;
 }
 

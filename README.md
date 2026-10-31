@@ -57,7 +57,7 @@ Keys use physical positions, so they work with a Hebrew keyboard layout. North i
 
 - **18 levels in 4 worlds**, each with a transfer level and a final with no hints. Every level is solvable with 3 stars through the same calls the UI makes (`tests/solutions.ts`), and plays through in a real browser (`scripts/drive.mjs`). See [LEVELS.md](LEVELS.md).
 - **Emergent boundaries:** the model in `src/model/` turns heat into mantle flow, flow into plate motion along each seam, and motion into a boundary type (pulling apart, pushing together, sliding). There is no boundary-type picker, depth slider, rock-cycle button, budget or time scrubber.
-- **Pure model, tested:** 43 tests (`npm test`) cover all levels, each boundary type from the right heat, continent–continent collisions without volcanoes, subduction with trench and arc, the level-7 "fishing in the valley" mistake, 2 Richter units ≈ 1,000× energy, site choice versus boundaries, constant and random strategies failing, rate × time, sea-floor age, rock rules, and the final slab against real relief.
+- **Pure model, tested:** the tests (`npm test`) cover all levels, each boundary type from the right heat, continent–continent collisions without volcanoes, subduction with trench and arc, the level-7 "fishing in the valley" mistake, 2 Richter units ≈ 1,000× energy, site choice versus boundaries, constant and random strategies failing, rate × time, sea-floor age, rock rules, and the final slab against real relief.
 - **3D scene:** one WebGL canvas with a floating slab, strata walls, a mantle cutaway whose convection ribbons follow your heat, a glowing core, water with depth colour, tree clumps, volcano smoke, seams and flow arrows. Tripo models: rigged pebble villagers (idle, cheer, panic, fall, build, walk), a rigged scientist, a rigged dog, houses with a "413" variant, boat, seismograph, warning tower, hot spring, ammonite, observatory, trees. See [ASSETS.md](ASSETS.md).
 - **Real relief for Israel:** level 18's rift floor comes from bundled NOAA ETOPO1 data (public domain), and tests check the built slab against the real belts and Dead Sea level.
 - **Feedback:** a one- or two-line Hebrew explanation after every mistake; restart keeps your heat so you change it on purpose; stars = 1 + no mistakes + a goal met cleanly − a hint.
@@ -65,9 +65,10 @@ Keys use physical positions, so they work with a Hebrew keyboard layout. North i
 - **Progress and learning events:** stars per level and first-attempt events (unaided or hinted, mistakes) stay in `localStorage`; nothing leaves the browser.
 - **Test hooks:** `window.render_game_to_text()` and a deterministic `window.advanceTime(ms)`.
 
+- **Planet commissions:** after the final, new heat puzzles (a sea of a given width, a snowy mountain, a volcanic arc over the fields). `scripts/gen-commissions.ts` generates layouts and a brute-force solver tries every heat kind, a grid of positions and every duration; a layout ships only when it has a win and at most 15% of all tries win. They are bundled in `src/data/commissions.json` and re-checked by `tests/commissions.test.ts`.
+
 ## Planned, not built yet
 
-- Generated "planet commissions" after the 18 levels (new layouts checked by the solver before they are offered).
 - Rivers (the Jordan and a Kinneret that fills from them); today only the Dead Sea forms as a closed lake.
 - A sound pass with recorded effects; the current sounds are synthesized.
 
