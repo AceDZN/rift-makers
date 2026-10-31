@@ -1,0 +1,105 @@
+{
+  "pebble": {
+    "file": "models/pebble.glb",
+    "clips": {
+      "idle": "idle",
+      "cheer": "cheer",
+      "panic": "scared_01",
+      "fall": "fall",
+      "build": "dig",
+      "walk": "walk"
+    },
+    "heightUnits": 0.858,
+    "rigged": true,
+    "notes": "חצצים villager, NEW Tripo gen. Mixamo humanoid (65 joints, root 'Armature'), stay-in-place clips. Bind pose T-pose: x ±0.5 is arm span. Faces +Z. No get-up preset in Tripo: play 'fall' then crossfade to 'idle' (or play 'fall' reversed). 'dig' (16 s) = build/work loop. Tint material.color for variety."
+  },
+  "scientist": {
+    "file": "models/scientist.glb",
+    "clips": {
+      "idle": "idle",
+      "talk": "greet_01",
+      "agree": "agree",
+      "disagree": "complain_01",
+      "skeptic": "fold_arms",
+      "cheer": "cheer"
+    },
+    "heightUnits": 0.997,
+    "rigged": true,
+    "notes": "Wegener-style explorer-scientist (fur parka, moustache, satchel + map), NEW Tripo gen. Mixamo humanoid, stay-in-place. Bind pose T-pose x ±0.5. Faces +Z. Use the same GLB tinted (e.g. darker parka) for the critic NPC; 'fold_arms' / 'complain_01' suit the critic."
+  },
+  "dog": {
+    "file": "models/dog.glb",
+    "clips": {
+      "walk": "preset:quadruped:walk"
+    },
+    "heightUnits": 0.809,
+    "rigged": true,
+    "notes": "REUSED from slope-sled (owned Tripo gen). Quadruped rig, only clip is walk. HEAD POINTS -X: rotate +π/2 about Y to face +Z. Idle = walk paused/slow; bark/run = walk with timeScale 1.8-2.2 plus procedural hop."
+  },
+  "house": {
+    "file": "models/house.glb",
+    "clips": {},
+    "heightUnits": 0.808,
+    "notes": "REUSED from ph-rangers (owned Tripo gen): cream limestone Galilee house, flat roof, turquoise door (+Z). Ordinary (non-413) house; collapses procedurally (rigid chunks / squash + dust)."
+  },
+  "house413": {
+    "file": "models/house413.glb",
+    "clips": {},
+    "heightUnits": 0.923,
+    "notes": "NEW Tripo gen: reinforced earthquake-proof house: cream limestone blocks, grey concrete corner columns + roof beam, dark steel X braces on the side walls, flat roof with parapet + water tank, turquoise door (+Z), green shield plaque. Pair with a procedural floating green '413' shield badge."
+  },
+  "seismograph": {
+    "file": "models/seismograph.glb",
+    "clips": {},
+    "heightUnits": 1.0,
+    "notes": "NEW Tripo gen: open-front wooden shed on stone base with brass drum seismograph (red zig-zag), dish + antenna on roof. Front faces +Z. Animate the drum/pen procedurally if wanted (single mesh, so overlay a procedural trace)."
+  },
+  "warning_tower": {
+    "file": "models/warning_tower.glb",
+    "clips": {},
+    "heightUnits": 1.0,
+    "notes": "NEW Tripo gen: cream limestone tsunami/quake warning tower with red-white siren horn, orange lamp, antenna, green shield, arched door (+Z). Includes a small grass disc at its base (sink slightly into terrain)."
+  },
+  "hot_spring": {
+    "file": "models/hot_spring.glb",
+    "clips": {},
+    "heightUnits": 0.47,
+    "notes": "NEW Tripo gen: basalt/orange-mineral rock basin with white rim crust, turquoise water surface, blank wooden sign and bucket. Add procedural steam particles."
+  },
+  "ammonite": {
+    "file": "models/ammonite.glb",
+    "clips": {},
+    "heightUnits": 0.963,
+    "notes": "NEW Tripo gen: golden-tan coiled ammonite on a cream limestone chunk. Scale small (fossil prop in strata / rock-hammer find)."
+  },
+  "observatory": {
+    "file": "models/observatory.glb",
+    "clips": {},
+    "heightUnits": 0.854,
+    "notes": "REUSED from frost-and-flame (owned Tripo gen): stone observatory with copper dome and a little snow on the base. Use as the volcano observatory."
+  },
+  "boat": {
+    "file": "models/boat.glb",
+    "clips": {},
+    "heightUnits": 0.839,
+    "notes": "REUSED from storm-proof (owned Tripo gen): small red fishing trawler with white wheelhouse and mast. Bow toward -X as exported (storm-proof rotates it by π)."
+  },
+  "rocks": {
+    "file": "models/rocks.glb",
+    "clips": {},
+    "heightUnits": 0.603,
+    "notes": "REUSED from ph-rangers: cream limestone boulder cluster (4.7k tris), good for instancing."
+  },
+  "olive": {
+    "file": "models/olive.glb",
+    "clips": {},
+    "heightUnits": 0.961,
+    "notes": "REUSED from ph-rangers: gnarled olive tree (ridge terraces)."
+  },
+  "cypress": {
+    "file": "models/cypress.glb",
+    "clips": {},
+    "heightUnits": 1.0,
+    "notes": "REUSED from ph-rangers: Mediterranean cypress (4.8k tris), good for instancing."
+  }
+}

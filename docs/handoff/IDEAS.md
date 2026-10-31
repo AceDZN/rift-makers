@@ -1,61 +1,69 @@
-# Geography games: ten concepts, three independent builds
+# Geography 3D games (Claude Code lead): ten ideas, three picks, one duplicate removed
 
-31 October 2026. Human commission: fun-first, browser-playable real 3D geography games for Hebrew-speaking Israeli grades 7–9, grounded in the owner's Workbook curriculum. Latest scope: research ten, select three, launch one separate builder chat/team per selected game. Each selected game has **24 authored levels**. The first seven form a possible seven-game portfolio; only three are commissioned for development now. These are design hypotheses, not validated learning products.
+31 October 2026. The user asked for 5–8 fun, real-3D, web-based educational games, with at least three geography games for Hebrew-speaking students in grades 7–9 on the Workbook geography curriculum ([grade 7](https://geography.workbook.co.il/grade-7), [grade 8](https://geography.workbook.co.il/grade-8), [grade 9](https://geography.workbook.co.il/grade-9)), each with its own builder thread. The plan was to find the best 10 ideas on the Idea Plotter map, pick the best 3 and build them, each with 10–20+ levels.
 
-## Research and decision
+**Two things changed the plan the same day:**
+1. A Codex planning chat ran the same commission in parallel and launched **Windshift Riders**, **Basin Breakers** and **Rush Hour Israel** (its files: `handoffs/geography-2026-10-31/`, `reports/geography-games-2026-10-31/`). Both sessions wrote into those folders, so this lead's files moved to `handoffs/geography-claude-2026-10-31/` and here.
+2. The user's rule: "You must make sure the games you suggest are not the same as the games we built already for the workbook … Last thing I want is to duplicate mechanics in our different games." The inventory is in [`EXISTING.md`](EXISTING.md): one interactive sim on each of the 72 Workbook geography modules, plus the three Codex games.
 
-Used the user's Chrome Idea Plotter at http://localhost:3010/, loaded its **73,466-game Steam export**, searched and inspected Mini Motorways, Superflight, From Dust and Terra Nil. Also read the local exported records and ran the existing blend geometry implementation against the pinned 73,466-game corpus: [13 pairs](pair-evidence.csv), [full output](pair-evidence.json), [reproducible script](measure-pairs.py). No provider calls, optimizer run, threshold edits, G1 approval, accepted-idea claim or originality certification. The pending paraphrase baseline and provisional clusters limit interpretation. UMAP positions are visualization, not distances.
+Result: **Cloud Shepherd is paused**, because it duplicated Windshift Riders (flight over Israel's weather: breezes, windward/lee, rain shadow). **Tilt World and Rift Makers continue with reworked verbs** so they don't reuse the Workbook sims' interactions. Five geography games are now in progress across both sessions.
 
-Inspector observations: Mini Motorways's nearest neighbor is Hexarium (cosine .808), followed by Mini Metro (.785); originality percentile 14.9. Superflight: Fly Flew Flown (.784), Hyperglide (.774); percentile 20.3. From Dust: The God (.701), God Simulator (.699), Deisim (.681), Paper Beast (.670); percentile 54.2. These are description similarity measurements, not fun scores. The existing archive's review counts are historical, not current Steam counts.
+## The curriculum and what suits 3D
 
-The best source mechanics for this commission are [Superflight's flight and proximity scoring](https://store.steampowered.com/app/732430/Superflight/), [Fugl's natural flight exploration](https://store.steampowered.com/app/643810/), [From Dust's terrain and water manipulation](https://store.steampowered.com/app/33460?curator_clanid=26956457&l=english), [Terra Nil's environmental transformation](https://store.steampowered.com/app/1593030/), and [Mini Motorways' road-network pressure](https://store.steampowered.com/app/1127500/Mini_Motorways/?curator_clanid=11454916&l=english). Official Steam pages were checked during this research. Superflight, Fugl, Terra Nil and Mini Motorways have positive review signals; From Dust's English reviews are Mixed, so it is a useful mechanic reference rather than an endorsement of the whole product. Borrow abstract mechanics, never their art, maps, names or source.
+| Grade | Chapters | Fit for a fun 3D game |
+|---|---|---|
+| 7: human geography | 1 globalization, 2 spatial inequality, 3 population, 4 migration, 5 rural and urban settlements | Mostly maps and data. Rush Hour Israel now covers city structure, location factors and core/periphery. |
+| 8: earth sciences | 1 universe and solar system, **2 earth's motions**, **3 weather and climate**, **4 internal processes**, 5 weathering, erosion and landforms, 6 natural resources | The strongest 3D material. Windshift Riders covers weather; Basin Breakers covers water and erosion. |
+| 9: Israel | 1 Israel in the Middle East, **2 landscape systems**, 3 the water system, 4 population and settlements, 5 economy and infrastructure, 6 environment and sustainability | Landform belts and the rain gradient are real 3D relief. Basin Breakers covers the water system; Rush Hour Israel covers transport. |
 
-| # | Original concept / action loop | Curriculum that changes the decision | Steam inspiration | 24-level campaign arc | Decision |
-|---|---|---|---|---|---|
-| 1 | **Windshift Riders — רוכבי הרוח**. Bank, dive, circle rising air, choose windward routes and land; restart a short run immediately. | Grade 8 solar heating, local wind, weather; grade 9 Israel's relief and climate. Ground materials, sea-breeze direction and slope orientation determine available lift and route cost. | Superflight × Fugl; A Short Hike's approachable exploration | Six acts × four levels: coast, heated surfaces, ridges, day/night reversals, Israeli regions, unaided expeditions. | **Build** |
-| 2 | **Basin Breakers — פורצי האגן**. Sculpt finite channels, place gates, release a water pulse and react to an emerging flood or shortage; rewind and try another plan. | Grade 8 drainage, runoff, infiltration and groundwater; grade 9 water technology, quality and management. Water quantity, salt and contamination affect different destinations. | From Dust × Terra Nil; Poly Bridge's build/test/replay | Six acts × four: drainage, permeable land, aquifer renewal, water quality, treatment and reuse, integrated drought/flood missions. | **Build** |
-| 3 | **Rush Hour Israel — שעת שיא**. Draw and reroute transport links, schedule buses, create a rail interchange, then survive a demand wave. | Grade 7 land use, accessibility and core/periphery; grade 9 transport and relief. Shortest distance can lose to travel time, capacity, terrain or poor access. | Mini Motorways × Cities: Skylines; Mini Metro | Six acts × four: street flow, land use, relief, mode choice, periphery, transfer networks. | **Build** |
-| 4 | **Faultline — קו השבר**. Push and slide giant terrain plates to create paths, divert lava, then cross the landscape you changed. | [Grade 8 plate tectonics](https://geography.workbook.co.il/grade-8/chapter-4/plate-tectonics), connected to terrain rather than earthquake trivia. Geological time is explicitly compressed. | From Dust × Teardown | Four each: separation, collision, transform boundaries, volcanic landforms, mixed obstacles, transfer puzzles. | Reserve: delightful manipulation, larger deformation/collision risk. |
-| 5 | **Orbit Outlaws — שודדי המסלול**. Short looping space-platform heists: time a landing on a rotating miniature Earth, travel between lit and dark locations, plan seasonal observation windows. | [Grade 8 rotation/revolution and seasons](https://geography.workbook.co.il/grade-8/chapter-2). Axial tilt, not distance, creates seasons; fixed stars and an illuminated globe remain readable. | Outer Wilds × Kerbal Space Program | Four each: rotation, local solar time, hemispheres, tilt, seasonal paths, time-loop transfer. | Reserve: strong discovery, costly camera/onboarding and scale accuracy. |
-| 6 | **Dune Drifters — גולשי הנוף**. Drive a light buggy through evolving courses; choose firm ground, inspect sediment and race a ghost after erosion changes the route. | [Grade 8 weathering, erosion and deposition](https://geography.workbook.co.il/grade-8/chapter-5/weathering-erosion), tied to traction and channel formation. No instant geological-change claim. | SnowRunner × Lonely Mountains: Downhill | Four each: weathered rock, river transport, deposition, wind dunes, human disturbance, transfer rallies. | Reserve: fun, overlaps flight's traversal portfolio slot. |
-| 7 | **Rewild Rangers — משקמי הנחל**. Spatial restoration puzzles with limited interventions; remove a pollution source, reconnect habitat, then pull temporary machines out without undoing recovery. | [Grade 9 rivers/coasts](https://geography.workbook.co.il/grade-9/chapter-6/rivers-coasts) and open spaces. Upstream source control and access tradeoffs matter. | Terra Nil × Dorfromantik | Four each: pollution sources, bank restoration, river corridors, coast access, land-use conflicts, whole-catchment transfer. | Reserve: strongest next calmer game, overlaps Basin's environmental systems. |
-| 8 | **Port Panic — בהלת הנמל**. Frantic cooperative-style sorting/dispatch with changing sea, rail and road connections; playable solo with controllable helpers. | [Grade 7 globalization drivers](https://geography.workbook.co.il/grade-7/chapter-1/globalization-drivers), grade 9 global economy. A real tradeoff between network access, delays and environmental burden. | Overcooked! 2 × Transport Fever 2 | Four each: links, ports, intermodal transfer, disruption, resource distribution, mixed trade. | Shelved: blend relatedness failed; geography could degrade into labels on cooking orders. |
-| 9 | **Settlement Stack — בונים מקום**. Draft and physically place compact settlements, score a viable location and adapt when the region changes. | [Grade 7 location factors](https://geography.workbook.co.il/grade-7/chapter-5/location-factors), grade 9 population distribution. Water, relief, access and jobs have competing costs. | ISLANDERS × Townscaper | Four each: water, relief, agricultural land, urban access, density, new-region transfer. | Shelved: clear learning, weaker action and crowded reference region. |
-| 10 | **Grid Guardians — שומרי הרשת**. Build a compact energy network and switch loads during a demand rush. | [Grade 9 energy infrastructure](https://geography.workbook.co.il/grade-9/chapter-5/energy-infrastructure), grade 8 renewable/nonrenewable resources. Sunshine, land footprint, demand and storage determine resilience. | Mini Motorways × ISLANDERS | Four each: demand, solar sites, dispatchable sources, storage, land costs, resilience transfer. | Shelved: worthwhile but repeats the selected transport-network interaction. |
+40 module snapshots are in [`../geography-games-2026-10-31/curriculum/`](../geography-games-2026-10-31/curriculum/) (files `grade-N_chapter-M_<module>.md`; the `g7-*`/`g8-*`/`g9-*` files there are the Codex chat's). They were fetched from the Workbook Markdown API on 31 Oct 2026.
 
-Campaign arcs for reserves are proposals; the three commissioned games have complete level briefs in their own repositories. No reserve builder has been launched.
+## What the map showed
 
-## Selection rubric
+1. **Explorer** (Idea Plotter at http://localhost:3010, with the full 73,466-game map loaded in the built-in browser). The From Dust inspector shows originality 54.2 %, closest twin 0.701 (The God), and a typical twin of 0.709. Seed originality percentiles are in [`seed-originality.txt`](seed-originality.txt): Outer Wilds 96.8, Gorogoa 96.1, Solar Ash 95.2, Alba 94.5, Flower 74.7, Katamari Damacy REROLL 69.3, From Dust 54.2, Reus 51.8; crowded: Teardown 7.7, Townscaper 12.9, Dorfromantik 12.9, ISLANDERS 15.4, Mini Metro 20.2.
+2. **Blend measurement.** I measured 24 pairs with the map's own blend code ([`measure-pairs.py`](measure-pairs.py), the same metrics as the math rounds, on the pinned 73,466-game corpus): [`pair-evidence.csv`](pair-evidence.csv) / [`.json`](pair-evidence.json). 19 pairs pass the relatedness gate. Lower density means an emptier region.
 
-Editorial ratings 1–5, not measured Steam metrics. Fun = exciting core action and replay; Learning = knowledge changes action; 3D = spatial depth matters; Build = plausible 24-level web scope; Distinct = contribution to this portfolio.
+| Blend (seeds) | Topic | Density ↓ | Used for |
+|---|---|---:|---|
+| Flower × Katamari Damacy REROLL | weather, climate | 0.614 | #1 Cloud Shepherd, **paused** (duplicates Windshift Riders) |
+| **Outer Wilds × Solar Ash** | earth's motions, seasons | **0.617** | **Tilt World** |
+| Alba × Firewatch | Israel landscapes | 0.623 | Landscape Detective |
+| Firewatch × A Short Hike | Israel landscapes | 0.627 | (Landscape Detective alt.) |
+| Plague Inc: Evolved × Mini Metro | migration, globalization | 0.657 | Push & Pull |
+| Kerbal Space Program × Outer Wilds | solar system | 0.679 | Slingshot Atlas |
+| **From Dust × Reus** | plate tectonics, landform belts | **0.681** | **Rift Makers** |
+| Timberborn × Station to Station | Israel's water system | 0.700 | Water Grid (now covered by Basin Breakers) |
+| From Dust × Timberborn | erosion, landforms | 0.701 | River Carver (overlaps Basin Breakers / RiverFlowSculptorLab) |
+| Townscaper × Frostpunk | city structure | 0.744 | City in Layers (now covered by Rush Hour Israel) |
+| Dome Keeper × Deep Rock Galactic | earth structure, rocks | 0.748 | Deep Drill (overlaps EarthLayersDrillLab) |
 
-| Game | Fun | Learning | 3D | Build | Distinct | /25 |
-|---|---:|---:|---:|---:|---:|---:|
-| Windshift Riders | 5 | 4 | 5 | 4 | 5 | 23 |
-| Basin Breakers | 5 | 5 | 5 | 3 | 5 | 23 |
-| Rush Hour Israel | 4 | 5 | 4 | 5 | 4 | 22 |
-| Faultline | 5 | 4 | 5 | 3 | 4 | 21 |
-| Orbit Outlaws | 5 | 5 | 5 | 2 | 4 | 21 |
-| Dune Drifters | 5 | 4 | 5 | 3 | 3 | 20 |
-| Rewild Rangers | 3 | 5 | 4 | 4 | 3 | 19 |
-| Port Panic | 5 | 3 | 4 | 3 | 3 | 18 |
-| Settlement Stack | 3 | 5 | 4 | 4 | 2 | 18 |
-| Grid Guardians | 4 | 5 | 3 | 4 | 2 | 18 |
+Failed relatedness: Untitled Goose Game × Flower, Katamari × From Dust, Pacific Drive × Mars First Logistics, Timberborn × Mini Metro and Descenders × From Dust. These figures are measured evidence only: G1 is pending, there was no optimizer run, and no originality is certified.
 
-Windshift's educational risk is flying through highlighted hoops without reading the environment. Its late levels must remove lift beacons and change surface, time and wind, while retaining ordinary instruments. Basin's technical risk is ambitious fluids: use an honest conservative heightfield model, not expensive particle simulation. Rush Hour's risk is a generic road puzzle: relief, regional access and service needs must change viable solutions, with brief action replays connecting cause and outcome.
+## The ten ideas, after the duplicate check
 
-## Map comparisons
+Scores 1–5: Fun, Geography drives play, 3D matters, Build, Gap. "Dup" names what an idea collides with.
 
-Lower mean top-k cosine similarity is a sparser description neighborhood, not greater fun or originality. Main pairs: Windshift Superflight/Fugl **.709**, alternative Superflight/A Short Hike **.662**; Basin From Dust/Terra Nil **.692**, alternative From Dust/Poly Bridge **.715**; Rush Mini Motorways/Cities: Skylines **.722**, alternative Mini Metro/ISLANDERS **.709**. All six pass the configured relatedness test. Orbit's **.679** is sparser than several selected pairs but its scope risk is worse. Port Panic's **.699** is not an eligible gap signal because its relatedness test failed. No density number overrides the gameplay review.
+| # | Idea | Topic (grade) | Total | Dup | Status |
+|---|---|---|:-:|---|---|
+| 1 | Cloud Shepherd | weather + Israel's climate | 24 | Windshift Riders (core flight over the same weather), SeaBreezeLab, IsraelRainTransectLab, ClimatographDetectiveLab | **paused** |
+| 2 | **Tilt World — עולם נטוי** | earth's motions (8 ch. 2) + sun energy (8 ch. 3) | 24 | was: SeasonTiltOrbitLab / DayNightSpinExplorer / MoonPhaseTideLab drag verbs, AlbedoBalanceLab, ClimatographDetectiveLab | **building; verbs reworked** |
+| 3 | **Rift Makers — שוברי היבשות** | tectonics, quakes, rocks (8 ch. 4) + landform belts (9 ch. 2) | 23 | was: PlateBoundaryLab picker, EarthLayersDrillLab, RockCycleExplorer, EarthquakeReadinessLab, IsraelLandformBeltsLab; Basin Breakers' terrain sculpting | **building; verbs reworked** |
+| 4 | Landscape Detective | Israel landscapes (9 ch. 1–2, 4) | 21 | partly CulturalLandscapeReaderLab / GlobalLandscapeSpotterLab / IsraelLandscapeMixerLab (reading a scene); the GeoGuessr place-the-pin loop is new | candidate |
+| 5 | Water Grid | water system (9 ch. 2–3) | 20 | Basin Breakers | dropped |
+| 6 | River Carver | erosion, landforms (8 ch. 5) | 20 | Basin Breakers, RiverFlowSculptorLab | dropped |
+| 7 | Slingshot Atlas | universe and solar system (8 ch. 1) | 19 | partly OrbitalSpeedExplorer; a gravity-assist flight is new | candidate |
+| 8 | Push & Pull | migration + globalization (7 ch. 1, 4) | 18 | MigrationPushPullLab (push/pull balance) | weak |
+| 9 | City in Layers | city structure (7 ch. 5) | 17 | Rush Hour Israel, CityBellSkylineLab | dropped |
+| 10 | Deep Drill | earth structure, rocks (8 ch. 4) | 17 | EarthLayersDrillLab | dropped |
 
-## Curriculum authority and accuracy
+### Tilt World — reworked
+A pocket-sized Earth and a solar-powered photographer robot hunting sky events. **The Earth, the Sun and the Moon can never be spun, dragged or dialed**: that's what the Workbook sims do. Time only moves forward, through commitments: sleep a number of hours or days chosen before you see the result, or take one ticket on the calendar train to a date. You win by working out where and when an event happens, committing, and getting there on foot. Albedo becomes a predict-then-shoot thermal photo, and the climograph level becomes "Where am I?" (latitude from the noon Sun). No cloth glider (Rooftop Radio).
 
-Retrieved Workbook's actual geography filter tree and **20 full modules**, saved in [curriculum/](curriculum/), with canonical URLs. Grade 7: people and settlement; grade 8: Earth sciences; grade 9: Israel. Workbook defines the requested curriculum scope; no Ministry endorsement or independent accreditation is implied. New missions, numeric budgets and simplified models are original teaching scenarios. Label schematic maps and simulation time clearly. This research is not a review of current transport policy, laws or water statistics.
+### Rift Makers — reworked
+A god game where **heat is your only power**. You place hot plumes and cold drips in the mantle, commit a stretch of deep time, and the boundaries *emerge* from the flows: you never pick a boundary type (PlateBoundaryLab). There's no drill slider, no rock-cycle buttons, no preparedness budget, no process chips and no direct terrain sculpting. Rocks are produced by the conditions you create, and villagers ask you where to settle on the plate map you made.
 
-The source has some simplifications/inconsistencies worth handling in QA: a treatment plant does not create water molecules; desalination separates freshwater from saline water and produces brine. Wastewater treatment is not automatically drinking-water treatment. Weather is not climate, and a single flight cannot establish a climate trend. Local high-to-low pressure examples are simplified, not a universal rule for all atmospheric motion. The transport page gives conflicting definitions of fixed/mobile infrastructure; use fixed facilities versus moving vehicles, and avoid turning that ambiguity into a scored fact. No legal or current numerical claim is needed for the core games.
+## Why Cloud Shepherd isn't replaced automatically
 
-Windshift's soaring mechanics extend the curriculum rather than reproducing a Workbook module: check the [FAA Glider Flying Handbook, weather chapter](https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/glider_handbook/gfh_chapter_9.pdf) for thermal/ridge lift. This is an arcade geography game, not flight instruction. Preserve differential heating and windward/lee distinctions; do not make dark color alone a universal thermal predictor.
+With the Codex chat's three games, five geography games are already in progress, which is inside the user's 5–8 range. A third Claude Code game would come from the candidates above. Landscape Detective (GeoGuessr-style deduction in 3D Israeli landscapes) is the strongest distinct one, and Slingshot Atlas (solar-system gravity assists) is the other. The user decides whether to add one.
 
-## Build handoff
-
-Separate public AceDZN repos and builder chats, one lead plus art/assets and geography/gameplay QA helpers per game. Each team must generate and inspect **imagegen gameplay targets before implementation**, then find/generate Tripo assets in its own tab of the user's Chrome, rig animated characters when applicable, build the 24-level game, compare actual play captures to targets, test failure/retry/transfer, and commit/push main at checkpoints. Production Vercel deployment is future work. Initial repository seeds are handoffs, not playable games. Launch/status records: [CREWS.md](../../handoffs/geography-2026-10-31/CREWS.md).
+All of these are hypotheses until students play them.
