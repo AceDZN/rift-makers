@@ -237,7 +237,8 @@ export class Hud {
     const g = this.game;
     const s = g.session!;
     const p = this.el('div', 'panel choices');
-    p.appendChild(this.el('span', 'qlabel', 'לאן ינוע כל לוח?'));
+    const r = s.roundCount > 1 ? ` <span class="note">סיבוב <span class="ltr">${s.round + 1}/${s.roundCount}</span></span>` : '';
+    p.appendChild(this.el('span', 'qlabel', 'לאן ינוע כל לוח?' + r));
     for (const q of s.def.predict ?? []) {
       p.appendChild(this.el('span', 'qlabel', q.he + ':'));
       for (const o of q.options) {
@@ -435,9 +436,14 @@ export class Hud {
     const s = g.session!;
     const c = this.el('div', 'card');
     c.setAttribute('role', 'dialog');
-    c.innerHTML = `<h2>לא בדיוק…</h2><p>${s.feedback?.line ?? ''}</p><p class="note">התחלה מחדש מחזירה את הזמן להתחלה. החום נשאר במקום, כדי שתוכלו לשנות אותו בכוונה.</p>`;
     const row = this.el('div', 'row');
-    row.appendChild(this.button('btn primary', 'התחילו מחדש', () => g.restart()));
+    if (s.roundWon) {
+      c.innerHTML = `<h2>נכון!</h2><p>${s.feedback?.line ?? ''}</p>`;
+      row.appendChild(this.button('btn primary', `לסיבוב <span class="ltr">${s.round + 2}/${s.roundCount}</span>`, () => g.nextRound()));
+    } else {
+      c.innerHTML = `<h2>לא בדיוק…</h2><p>${s.feedback?.line ?? ''}</p><p class="note">התחלה מחדש מחזירה את הזמן להתחלה. החום נשאר במקום, כדי שתוכלו לשנות אותו בכוונה.</p>`;
+      row.appendChild(this.button('btn primary', 'התחילו מחדש', () => g.restart()));
+    }
     row.appendChild(this.button('btn', 'לבחירת שלב', () => g.exitToSelect()));
     c.appendChild(row);
     const o = this.el('div', 'overlay aside');

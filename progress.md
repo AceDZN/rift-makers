@@ -43,10 +43,14 @@ README, LEVELS.md verified solutions, `tests/rules.test.ts` (rate × time, sea-f
 
 An independent playtester tried to break every level (see PLAYTEST.md). Closed the bypasses: mistakes and hints now follow the student across re-entry until the level is won, restart is refused during a run, the L4 readout hides the answer, prediction arrows show only with the hint, L14 options are shuffled with the facts shown up front, the L10 decoy and rotations no longer give the answer away. Also: labels never swallow clicks, fixed heat is drawn from the start, the L16 hammer reads the landscape as it stands, every collapsed town is named, Hebrew units, one shared heat counter, the compass stays on screen on phones, and the deprecated shadow type is gone.
 
+## 9. Last playtest items
+
+- Level 3 has three prediction rounds with different answers, so no fixed pair of arrows wins.
+- Level 7's mountain has a ceiling (5,000 m, not enough air above it), so maximum time no longer always wins.
+- Sea width is measured between grid nodes: the result line now matches rate × time exactly. Commissions re-solved.
+
 ## Open
 
-- L3 has one layout; a mirrored second round would stop "both plates toward the middle" from always winning.
-- L7 accepts any duration above the minimum.
-
+- Pin leader lines in levels 14 and 15 (pins are stacked close to their places, but don't point at them).
 - Rivers and a fed Kinneret.
 - Recorded sound effects.

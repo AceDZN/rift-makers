@@ -207,6 +207,10 @@ export class Game {
     this.afterAction();
   }
 
+  nextRound() {
+    this.act((s) => s.nextRound());
+  }
+
   hint() {
     const s = this.session;
     if (!s || s.def.noHints || s.outcome) return;
@@ -654,6 +658,16 @@ export class Game {
         break;
       case 'sample':
         this.sampleLabel(e.x, e.z, e.value);
+        break;
+      case 'round':
+        this.rebuildAfterRestart();
+        this.syncHeats();
+        break;
+      case 'cheer':
+        if (s.roundWon) {
+          this.audio.chirp(true);
+          for (const a of this.villagerActors.values()) a.play('cheer');
+        }
         break;
       case 'fire':
         this.globe?.showReadings(s.readings);

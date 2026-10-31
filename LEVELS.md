@@ -87,8 +87,8 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - "Always both arrows outward" and "always toward the plume" must fail.
   - Author three sub-rounds with different plume/drip layouts (incl. mirrored) so a fixed arrow pattern wins at most one.
 - **Win check:** all committed arrows match the sign of the model's plate velocities.
-- **Verified solution:** predict the western plate moves east and the eastern plate moves west (toward the fixed cold drip), then run 4 Myr: the plates meet and a range rises. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
-- **As built:** one layout; the surface flow arrows show only with the hint, so the prediction can't be read off the slab. The mirrored sub-rounds are not built yet, so "both toward the middle" still wins this layout (PLAYTEST.md #6).
+- **Verified solution:** round 1 west/east, round 2 west/west, round 3 east/west, 4 Myr each; in the last round the plates meet and a range rises. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
+- **As built:** three rounds, all of which must be right: a plume under the junction (the plates part: west, east), a drip in the west and a plume in the east (both plates west), and the plume and drip of the original layout (both toward the drip: east, west). Each of the four fixed pairs of arrows fails at least one round (`tests/misconceptions.test.ts`). The surface flow arrows show only with the hint.
 - **Not-like note:** the prediction is a one-time commit before deep time runs, not a picker for a boundary type.
 
 ### L4 Slow but sure
@@ -105,7 +105,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - Durations that win on other levels (e.g. L1's 10 Myr) must fail.
   - A second round with a different rate (e.g. 3 cm/yr, target 240 km → 8 Myr) prevents memorizing "6".
 - **Win check:** |width − 300| ≤ 25 km.
-- **Verified solution:** the plume is fixed at 5 cm/yr; commit 6 Myr (5.5–6.5 accepted): 5 × 6 × 10 = 300 km. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
+- **Verified solution:** the plume is fixed at 5 cm/yr; commit 6 Myr: 5 × 6 × 10 = 300 km. The judge measures the sea between grid nodes, so the result line says exactly what the readout says (300 km); 5.5 and 6.5 Myr give 275 and 325 km and fail. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 - **Care:** if the engine's 5 cm/yr is per plate, the answer becomes 3 Myr. The HUD wording must say "הפער בין החופים גדל ב-5 ס"מ בשנה".
 
 ### L5 Transfer: the quiet planet
@@ -150,7 +150,8 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - The tutorial for expectation: when the player first sees the collision, a "volcano observatory" prop placed by villagers stays quiet. Line: "שתי יבשות נדחסו זו לזו; אף לוח לא שקע, ולכן אין הרי געש".
 - **Constant-strategy check:** the "one plume in the middle" sample must fail (valley). Random must be under 5%.
 - **Win check:** peak height at the wish ≥ snow line, and volcano count = 0 (asserted, part of the COLL test).
-- **Verified solution:** a cold drip under the seam at (500, 300) km, 8 Myr: both continents are drawn in, nothing dives, a range without volcanoes. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
+- **As built:** the wish is a peak of 3,500–5,000 m ("מעל 5,000 מ׳ אין מספיק אוויר לגולשים"). The range keeps growing while the plates converge, so the longest squeeze fails with "גבוה מדי"; only 5–7 Myr win (3 of 19 durations, `tests/misconceptions.test.ts`).
+- **Verified solution:** a cold drip under the seam at (500, 300) km, 6 Myr: both continents are drawn in, nothing dives, a range without volcanoes at about 4,250 m. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 
 ### L8 Ocean dives under
 - **Geography (PT, EV):**

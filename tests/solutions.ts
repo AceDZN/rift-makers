@@ -4,6 +4,9 @@
 import { Session } from '../src/model/session.ts';
 import { heatRun } from './helpers.ts';
 
+/** Level 3's answers per round, west plate then east plate. */
+export const L3_ANSWERS = [['west', 'east'], ['west', 'west'], ['east', 'west']] as const;
+
 /** Authored solutions. Each returns the finished session. */
 export const SOLUTIONS: Record<number, () => Session> = {
   1: () => heatRun(1, [['plume', 560, 250]]),
@@ -16,9 +19,14 @@ export const SOLUTIONS: Record<number, () => Session> = {
   },
   3: () => {
     const s = new Session(3);
-    s.predict('W', 'east');
-    s.predict('E', 'west');
-    return heatRun(3, [], undefined, s);
+    // apart, then both west, then together
+    for (const [w, e] of L3_ANSWERS) {
+      s.nextRound();
+      s.predict('W', w);
+      s.predict('E', e);
+      heatRun(3, [], undefined, s);
+    }
+    return s;
   },
   4: () => heatRun(4, [], 6),
   5: () => {
@@ -33,7 +41,7 @@ export const SOLUTIONS: Record<number, () => Session> = {
     s.dig(1180, 300);
     return s;
   },
-  7: () => heatRun(7, [['drip', 500, 300]], 8),
+  7: () => heatRun(7, [['drip', 500, 300]], 6),
   8: () => heatRun(8, [['drip', 580, 300]], 4),
   9: () => heatRun(9, [['drip', 100, 150], ['plume', 100, 450]], 4.5),
   10: () => {

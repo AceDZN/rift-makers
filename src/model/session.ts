@@ -17,9 +17,11 @@ import {
   buildTerrain,
   cellAt,
   divingSide,
+  finalSampler,
+  type Sampler,
   maxElevNear,
   movePoint,
-  waterAlong,
+  waterAlongExact,
 } from './terrain.ts';
 import { type LevelDef, type RockId, levelById } from './levels.ts';
 import { type Heat, type HeatKind, type SeamMotion, flowAt, plateAt, plateVelocity, seamMotion } from './heat.ts';
@@ -47,7 +49,8 @@ export type GameEvent =
   | { type: 'wave' }
   | { type: 'collapse'; house: string }
   | { type: 'cheer' }
-  | { type: 'restart' };
+  | { type: 'restart' }
+  | { type: 'round'; n: number };
 
 export interface Outcome {
   success: boolean;
@@ -87,6 +90,7 @@ export class Session {
   private mistakeKeys = new Set<string>();
   private heatSeq = 0;
   private terrainCache: { key: string; terrain: Terrain } | null = null;
+  private samplerCache: { key: string; sample: Sampler } | null = null;
   private flowCache: { key: string; motions: SeamMotion[] } | null = null;
   private announced = new Set<string>();
   private quakeClock = 0;
@@ -99,6 +103,9 @@ export class Session {
   marked: LayerId | null = null;
   // predictions
   predictions: Record<string, string> = {};
+  round = 0;
+  /** This round was right; the next one waits for the player. */
+  roundWon = false;
   // heat-flow probes / sea-floor ages
   probes: Probe[] = [];
   dug: Probe | null = null;
@@ -210,7 +217,7 @@ export class Session {
 
   /** Back to the start of deep time with the heat kept. Not mid-run: time already spent is spent. */
   restart(): boolean {
-    if (this.outcome || this.phase === 'running') return false;
+    if (this.outcome || this.phase === 'running' || this.roundWon) return false;
     this.resetPhase();
     for (const h of this.heats) h.bornMyr = 0;
     this.hammered = [];
@@ -466,13 +473,14 @@ export class Session {
         out.push({ villager: vl.id, ok, reason: ok ? 'ok' : 'noSea' });
       } else if (w.kind === 'seaBetween') {
         const other = vs.find((o) => o.id === w.other)!;
-        const width = Math.round(waterAlong(ter, p, this.villagerPos(other), 1));
+        const width = Math.round(waterAlongExact(ter, this.sampler(), p, this.villagerPos(other), 1));
         const ok = width >= w.min && width <= w.max;
         out.push({ villager: vl.id, ok, value: width, reason: ok ? 'ok' : width < w.min ? 'tooNarrow' : 'tooWide' });
       } else {
         const h = Math.round(maxElevNear(ter, p, w.r));
-        const ok = h >= w.minElev;
-        out.push({ villager: vl.id, ok, value: h, reason: ok ? 'ok' : 'tooLow' });
+        const high = w.maxElev !== undefined && h > w.maxElev;
+        const ok = h >= w.minElev && !high;
+        out.push({ villager: vl.id, ok, value: h, reason: ok ? 'ok' : high ? 'tooHigh' : 'tooLow' });
       }
     }
     return out;
@@ -547,6 +555,14 @@ export class Session {
     return { base: d.base, boundaries: this.boundaries(), tMyr: this.t, deposits, nx: big ? 113 : 97, nz: big ? 73 : 65 };
   }
 
+  /** The landscape as a continuous function, for measuring between grid nodes. */
+  private sampler(): Sampler {
+    const input = this.terrainInput();
+    const key = JSON.stringify([input.boundaries, input.tMyr, input.deposits]);
+    if (this.samplerCache?.key !== key) this.samplerCache = { key, sample: finalSampler(input).sample };
+    return this.samplerCache.sample;
+  }
+
   terrain(): Terrain {
     const input = this.terrainInput();
     const key = JSON.stringify([input.boundaries, input.tMyr, input.deposits]);
@@ -599,7 +615,7 @@ export class Session {
       if (b.type === 'pull') return this.fail('sulkFishing');
       if (b.type === 'slide') return this.fail('slideNoMountain');
       const w = wishes.find((x) => !x.ok)!;
-      return this.fail('tooLow', { value: w.value ?? 0 });
+      return this.fail(w.reason, { value: w.value ?? 0 });
     }
     if (b.type === 'push') return this.fail('mountainNotSea');
     if (b.type === 'slide') return this.fail('slideNoSea');
@@ -675,6 +691,10 @@ export class Session {
     return this.plateVelocity(plateId).x >= 0 ? 'east' : 'west';
   }
 
+  get roundCount(): number {
+    return this.def.rounds?.length ?? 1;
+  }
+
   private judgePredict() {
     for (const p of this.def.predict ?? []) {
       const truth = this.plateDir(p.key);
@@ -682,7 +702,27 @@ export class Session {
         return this.fail('wrongPredict', { plate: p.he, dir: truth === 'east' ? 'מזרחה' : 'מערבה' });
       }
     }
+    if (this.round < this.roundCount - 1) {
+      this.roundWon = true;
+      this.phase = 'review';
+      this.events.push({ type: 'cheer' });
+      return this.say('good', this.def.rounds![this.round].line);
+    }
     this.finish();
+  }
+
+  /** After a right round: the next layout, from the start of deep time. */
+  nextRound(): boolean {
+    if (!this.roundWon) return false;
+    this.roundWon = false;
+    this.round++;
+    this.heats = this.def.rounds![this.round].fixedHeat.map((h) => ({ ...h, fixed: true }));
+    this.predictions = {};
+    this.resetPhase();
+    this.announced.clear();
+    this.feedback = null;
+    this.events.push({ type: 'round', n: this.round });
+    return true;
   }
 
   // ───────── level 2: seismograph ─────────
@@ -1170,6 +1210,7 @@ export class Session {
     snap.volcanoes = ter.volcanoes.filter((x) => x.h > 300).map((x) => ({ x: Math.round(x.x), z: Math.round(x.z) }));
     if (d.kind === 'seismo') Object.assign(snap, { stations: this.stations, readings: this.readings.map((r) => ({ angle: r.angleDeg, second: r.solidOnlyArrives })), marked: this.marked });
     if (d.predict) snap.predictions = this.predictions;
+    if (d.rounds) Object.assign(snap, { round: this.round + 1, rounds: this.roundCount, roundWon: this.roundWon });
     if (this.probes.length) snap.probes = this.probes;
     if (this.dug) snap.dug = this.dug;
     if (d.road) snap.roadOffsetKm = this.roadOffset();

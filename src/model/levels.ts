@@ -30,7 +30,7 @@ export type Kind =
 export type Wish =
   | { kind: 'sea'; r: number }
   | { kind: 'seaBetween'; other: string; min: number; max: number }
-  | { kind: 'mountain'; r: number; minElev: number };
+  | { kind: 'mountain'; r: number; minElev: number; maxElev?: number };
 
 export interface Villager {
   id: string;
@@ -104,6 +104,8 @@ export interface LevelDef {
   // kind-specific
   seismo?: { stations: number };
   predict?: { key: string; he: string; options: { id: string; he: string }[]; answer: string }[];
+  /** Prediction rounds, each with its own burning heat; all must be right. The last round's line is `success`. */
+  rounds?: { fixedHeat: Heat[]; line: string }[];
   probes?: number;
   dig?: { samples: number; minAgeMyr: number; ridgeX: number; spreadMyr: number; rateCmYr: number };
   fields?: { x: number; z: number; band: number; town: Vec2; townSafeKm: number };
@@ -209,6 +211,21 @@ const ISRAEL_RIFT: RiftProfile = {
 
 const L1 = splitNS(800, 500, 560);
 const L3 = splitNS(1000, 500, 500);
+// Three layouts with different answers (apart, both the same way, together), so no fixed pair of arrows wins them all.
+const L3_ROUNDS: { fixedHeat: Heat[]; line: string }[] = [
+  {
+    fixedHeat: [{ id: 'p', kind: 'plume', x: 500, z: 250, fixed: true }],
+    line: 'מעל הפלומה החומר החם עלה והתפשט לשני הצדדים, ומשך את הלוחות זה מזה. עכשיו החום בוער במקום אחר.',
+  },
+  {
+    fixedHeat: [{ id: 'd', kind: 'drip', x: 100, z: 250, fixed: true }, { id: 'p', kind: 'plume', x: 900, z: 250, fixed: true }],
+    line: 'הזרם רץ מהפלומה במזרח אל הטפטוף במערב, ושני הלוחות נגררו יחד מערבה. סיבוב אחרון.',
+  },
+  {
+    fixedHeat: [{ id: 'p', kind: 'plume', x: 100, z: 250, fixed: true }, { id: 'd', kind: 'drip', x: 480, z: 250, fixed: true }],
+    line: '',
+  },
+];
 const L4 = splitNS(1200, 600, 600);
 const L6 = splitNS(1200, 600, 450, 'oceanic', 'oceanic');
 const L7 = splitNS(1000, 600, 500);
@@ -312,8 +329,8 @@ export const LEVELS: LevelDef[] = [
     module: URL8 + 'plate-tectonics',
     tag: 'בינוני',
     kind: 'predict',
-    intro: 'פלומה חמה וטפטוף קר כבר בוערים מתחת ללוחות. סירות החצצים עוגנות על קו המפגש. לאן ינוע כל לוח?',
-    goal: 'התחייבו לכיוון של כל לוח, ואז הריצו 4 מיליון שנה',
+    intro: 'החום כבר בוער מתחת ללוחות, ובכל סיבוב במקום אחר. סירות החצצים עוגנות על קו המפגש. לאן ינוע כל לוח? שלושה סיבובים.',
+    goal: 'בכל סיבוב: התחייבו לכיוון של כל לוח, ואז הריצו 4 מיליון שנה',
     hint: 'עקבו אחרי החיצים של זרמי הערבול: מהפלומה החומר זורם החוצה, ואל הטפטוף הקר הוא זורם פנימה.',
     hintShows: 'flow',
     success: 'שני הלוחות נגררו אל הטפטוף הקר והתנגשו: במקום המעגן קם רכס הרים. טוב שהזזתם את הסירות.',
@@ -323,10 +340,8 @@ export const LEVELS: LevelDef[] = [
       hill(880, 120, 80, 800),
     ], 5),
     ...L3,
-    fixedHeat: [
-      { id: 'p', kind: 'plume', x: 100, z: 250, fixed: true },
-      { id: 'd', kind: 'drip', x: 480, z: 250, fixed: true },
-    ],
+    fixedHeat: L3_ROUNDS[0].fixedHeat,
+    rounds: L3_ROUNDS,
     cellKm: 250,
     strength: 4,
     duration: { min: 4, max: 4, step: 1, start: 4, fixed: true },
@@ -426,8 +441,8 @@ export const LEVELS: LevelDef[] = [
     module: URL8 + 'plate-tectonics',
     tag: 'בינוני',
     kind: 'heat',
-    intro: 'החצצים רוצים הר מושלג לחג השלג, בין שני הכפרים. ממזרח עומד רכס ישן, אבל הוא נשחק ונמוך.',
-    goal: 'הר גבוה מ־3,500 מ׳ עם שלג בין הכפרים',
+    intro: 'החצצים רוצים הר מושלג לחג השלג, בין שני הכפרים. ממזרח עומד רכס ישן, אבל הוא נשחק ונמוך. ולא גבוה מדי: מעל 5,000 מ׳ אין מספיק אוויר לגולשים.',
+    goal: 'הר בגובה 3,500–5,000 מ׳ עם שלג בין הכפרים',
     hint: 'מה קורה ללוחות מעל פלומה חמה, ומה מעל טפטוף קר? ואם שתי יבשות נפגשות, האם אחת מהן צוללת?',
     hintShows: 'flow',
     success: 'הטפטוף הקר משך את שתי היבשות זו אל זו. אף לוח לא צלל, לכן נוצרו הרי קימוט בלי הרי געש, וההר עדיין מתרומם.',
@@ -441,8 +456,8 @@ export const LEVELS: LevelDef[] = [
     strength: 4,
     duration: { min: 2, max: 20, step: 1, start: 4 },
     villagers: [
-      { id: 'w', x: 380, z: 330, wish: { kind: 'mountain', r: 140, minElev: 3500 }, says: 'הר עם שלג, בבקשה!' },
-      { id: 'e', x: 620, z: 330, wish: { kind: 'mountain', r: 140, minElev: 3500 }, says: 'מגלשות!' },
+      { id: 'w', x: 380, z: 330, wish: { kind: 'mountain', r: 140, minElev: 3500, maxElev: 5000 }, says: 'הר עם שלג, בבקשה!' },
+      { id: 'e', x: 620, z: 330, wish: { kind: 'mountain', r: 140, minElev: 3500, maxElev: 5000 }, says: 'מגלשות, אבל שיהיה אוויר!' },
     ],
     visibleKm: 60,
   },

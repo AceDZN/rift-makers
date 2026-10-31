@@ -615,6 +615,33 @@ export function waterAlong(t: Terrain, a: Vec2, b: Vec2, kind: 1 | 2 | 0 = 1): n
   return (wet / steps) * L;
 }
 
+/**
+ * Water length (km) along a → b with the shore found between grid nodes: a
+ * point is water when the landscape there lies below the surface of water held
+ * by one of its four surrounding nodes. waterAlong rounds each point to its
+ * nearest node, which can add a whole cell where a shore falls on a node.
+ */
+export function waterAlongExact(t: Terrain, sample: Sampler, a: Vec2, b: Vec2, kind: 1 | 2 = 1): number {
+  const L = dist(a, b);
+  const steps = Math.max(8, Math.ceil(L / 2));
+  let wet = 0;
+  for (let s = 0; s < steps; s++) {
+    const p = add(a, scale(sub(b, a), (s + 0.5) / steps));
+    const fi = clamp((p.x / t.widthKm) * (t.nx - 1), 0, t.nx - 1);
+    const fj = clamp((p.z / t.depthKm) * (t.nz - 1), 0, t.nz - 1);
+    let level = NaN;
+    for (const [di, dj] of [[0, 0], [1, 0], [0, 1], [1, 1]]) {
+      const k = Math.min(Math.floor(fj) + dj, t.nz - 1) * t.nx + Math.min(Math.floor(fi) + di, t.nx - 1);
+      if (t.waterKind[k] === kind) {
+        level = t.water[k];
+        break;
+      }
+    }
+    if (!Number.isNaN(level) && sample(p).elev < level) wet++;
+  }
+  return (wet / steps) * L;
+}
+
 /** Highest elevation within r km of p. */
 export function maxElevNear(t: Terrain, p: Vec2, r: number): number {
   let best = -Infinity;

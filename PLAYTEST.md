@@ -86,14 +86,14 @@ Status of each finding in the build that follows this report. Every fix is re-ch
 | 3 | fixed | The readout shows "? ק״מ" until the run ends; the student works out rate × time. |
 | 4 | fixed | Labels and bubbles never take clicks (`#labels > * {pointer-events:none}`, only pin buttons opt in). L18 town-site pins appear only in the sites phase. |
 | 5 | fixed | Fixed heat and its flow are drawn from the start. |
-| 6 | partly | Flow arrows in prediction levels show only with the hint. The mirrored second layout is still open. |
+| 6 | fixed | Flow arrows in prediction levels show only with the hint. Level 3 has three rounds with different answers (apart, both west, together); every fixed pair of arrows fails one. |
 | 7 | fixed | On phones the choice list scrolls inside the card, and the toast no longer covers or blocks pins. |
 | 8 | fixed | The hammer reads the landscape as it stands now (crest, sea floor, limestone), and every sample says what rock it is and which family. |
 | 9 | fixed | The decoy is "יבשת הדרום"; the pieces start rotated past the snap angle; keyboard Enter drops heat off-centre. |
 | 10 | fixed | Options are shuffled per attempt, and the panel shows wave height, time to the wave and walking speed before the first run. |
 | 11 | fixed | With a fixed duration the line says to look for where the plates pull apart between the villages. |
-| 12 | open | L1 stays forgiving (tutorial). L7 still accepts any duration above the minimum. |
-| 13 | open | The judge measures the sea at the shoreline, about 12 km wider than rate × time. |
+| 12 | fixed (L7) | L7's wish is now 3,500–5,000 m, so the longest squeeze fails ("גבוה מדי"); 3 of 19 durations win. L1 stays forgiving as the tutorial. |
+| 13 | fixed | The extra 12 km was one grid cell: the shore node counted as sea. The judge now finds the shore between nodes, so L4 measures exactly 300 km at 6 Myr. Commissions were re-solved with the new measure (same layouts). |
 | 14 | partly | Stacked pins move up at most 2.2 pin heights, so they stay near their place; no leader lines. |
 | 15 | fixed | Grammar fixed; cliffs and slopes get their own line; every collapsed town is named. |
 | 16 | by design | Left for the lead to decide: the final names the missing belt after a failure, as feedback. |
@@ -106,4 +106,4 @@ Status of each finding in the build that follows this report. Every fix is re-ch
 | 23 | fixed | Hebrew units: מ׳, דק׳, ק״מ. |
 | 24 | fixed | `PCFShadowMap`. |
 
-Bypasses closed: restart mid-run, re-entering the level, reading the L4 readout, reading the L3 arrows, first option in L14, the centre keyboard drop in L10.
+Bypasses closed: always the same arrows in L3, maximum time in L7, restart mid-run, re-entering the level, reading the L4 readout, reading the L3 arrows, first option in L14, the centre keyboard drop in L10.

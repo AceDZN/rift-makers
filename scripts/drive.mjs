@@ -21,11 +21,15 @@ const act = (src) => ({ act: src });
 const PLAN = {
   1: [heat([['plume', 560, 250]])],
   2: [act(`s => { for (const a of [40, 100, 160]) s.placeStation(a); s.fire(); }`), { wait: 3000 }, act(`s => s.mark('outerCore')`)],
-  3: [act(`s => { s.predict('W', 'east'); s.predict('E', 'west'); }`), heat([])],
+  3: [
+    act(`s => { s.predict('W', 'west'); s.predict('E', 'east'); }`), heat([]), { shot: 'round1' },
+    act(`s => { s.nextRound(); s.predict('W', 'west'); s.predict('E', 'west'); }`), heat([]),
+    act(`s => { s.nextRound(); s.predict('W', 'east'); s.predict('E', 'west'); }`), heat([]),
+  ],
   4: [heat([], 6)],
   5: [act(`s => { for (const x of [200, 450, 650]) s.probe(x, 250); }`), heat([['plume', 650, 250]], 2)],
   6: [act(`s => { s.sampleAge(100, 300); s.sampleAge(1100, 300); }`), { shot: 'mid' }, act(`s => s.dig(1180, 300)`)],
-  7: [heat([['drip', 500, 300]], 8)],
+  7: [heat([['drip', 500, 300]], 6)],
   8: [heat([['drip', 580, 300]], 4)],
   9: [heat([['drip', 100, 150], ['plume', 100, 450]], 4.5)],
   10: [act(`s => { for (const p of s.def.wegener.pieces) if (p.target) s.movePiece(p.id, p.target.x, p.target.z, p.target.rot); }`), { shot: 'mid' }, act(`s => s.present()`), heat([['plume', 3000, 1750]])],

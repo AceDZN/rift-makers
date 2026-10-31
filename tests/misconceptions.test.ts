@@ -9,6 +9,7 @@ import { rng } from '../src/model/geo.ts';
 import { energyRatio, shakingRatio } from '../src/model/quake.ts';
 import { reasonLine } from '../src/model/explain.ts';
 import { heatRun } from './helpers.ts';
+import { L3_ANSWERS } from './solutions.ts';
 
 const failed = (s: Session) => !s.outcome?.success;
 
@@ -28,7 +29,7 @@ test('a plume and a drip side by side make the plates slide past each other', ()
 });
 
 test('continent meets continent: fold mountains, no volcanoes', () => {
-  const s = heatRun(7, [['drip', 500, 300]], 8);
+  const s = heatRun(7, [['drip', 500, 300]], 6);
   assert.equal(s.terrain().volcanoes.length, 0);
   assert.ok(s.wishStatus().every((w) => w.ok));
 });
@@ -95,9 +96,9 @@ test('each level has its misconception fail', () => {
   assert.ok(!s2.outcome && s2.mistakes === 1);
   // L3: wrong direction
   const s3 = new Session(3);
-  s3.predict('W', 'west');
-  s3.predict('E', 'east');
-  assert.ok(failed(heatRun(3, [], undefined, s3)));
+  s3.predict('W', 'east');
+  s3.predict('E', 'west');
+  assert.ok(failed(heatRun(3, [], undefined, s3)) && s3.phase === 'review' && !s3.roundWon);
   // L4: too short
   assert.ok(failed(heatRun(4, [], 3)));
   // L5: plume away from the upwelling
@@ -194,4 +195,41 @@ test('random heat rarely wins', () => {
     }
     assert.ok(wins / N <= 0.25, `level ${l.id}: random heat won ${wins}/${N}`);
   }
+});
+
+test('level 3: every fixed pair of arrows fails a round, and each round has its own answer', () => {
+  const dirs = ['east', 'west'] as const;
+  for (const w of dirs)
+    for (const e of dirs) {
+      const s = new Session(3);
+      for (let r = 0; r < s.roundCount && !s.outcome; r++) {
+        s.nextRound();
+        s.predict('W', w);
+        s.predict('E', e);
+        heatRun(3, [], undefined, s);
+        if (!s.roundWon && !s.outcome) break;
+      }
+      assert.ok(!s.outcome?.success, `always ${w}/${e} must not win`);
+    }
+  const s = new Session(3);
+  assert.equal(s.roundCount, 3);
+  for (const [w, e] of L3_ANSWERS) {
+    s.nextRound();
+    assert.equal(s.plateDir('W'), w);
+    assert.equal(s.plateDir('E'), e);
+    s.predict('W', w);
+    s.predict('E', e);
+    heatRun(3, [], undefined, s);
+    if (s.roundWon) assert.equal(s.restart(), false, 'no replay of a won round');
+  }
+  assert.equal(s.outcome?.stars, 3);
+});
+
+test('level 7: the longest squeeze is no longer a sure win', () => {
+  const s = heatRun(7, [['drip', 500, 300]], 20);
+  assert.equal(s.phase, 'review');
+  assert.match(s.feedback!.line, /גבוה מדי/);
+  const wins = [];
+  for (let d = 2; d <= 20; d++) if (heatRun(7, [['drip', 500, 300]], d).outcome?.success) wins.push(d);
+  assert.ok(wins.length >= 2 && wins.length <= 4, `winning durations: ${wins}`);
 });
