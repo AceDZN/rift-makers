@@ -43,10 +43,12 @@ export class World {
     });
 
     this.scene.background = new THREE.Color('#0a0c1c');
-    this.scene.fog = new THREE.Fog('#0a0c1c', 40, 120);
+    this.scene.fog = new THREE.Fog('#0a0c1c', 40, 160);
     this.scene.add(this.root);
     this.addLights();
+    this.addSky();
     this.addStars();
+    this.addDebris();
 
     this.ro = new ResizeObserver(() => this.resize());
     this.ro.observe(this.container);
@@ -72,6 +74,51 @@ export class World {
     const rim = new THREE.DirectionalLight('#ff8a4a', 0.9);
     rim.position.set(6, -2, 10);
     this.scene.add(rim);
+  }
+
+  /** A sunset glow low behind the slab that fades into the starry void. */
+  private addSky() {
+    const m = new THREE.ShaderMaterial({
+      side: THREE.BackSide,
+      depthWrite: false,
+      fog: false,
+      vertexShader: `varying vec3 vDir; void main() { vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+      fragmentShader: `varying vec3 vDir;
+        void main() {
+          vec3 d = normalize(vDir);
+          float back = 0.5 + 0.5 * dot(normalize(d.xz + 1e-4), vec2(0.25, -1.0));
+          float band = exp(-pow((d.y + 0.01) / 0.07, 2.0)) * pow(back, 4.0);
+          vec3 c = vec3(0.035, 0.045, 0.11);
+          c = mix(c, vec3(0.16, 0.10, 0.24), exp(-pow((d.y - 0.05) / 0.12, 2.0)) * pow(back, 3.0) * 0.5);
+          c += vec3(1.0, 0.48, 0.20) * band * 0.55;
+          gl_FragColor = vec4(c, 1.0); // already display colours
+        }`,
+    });
+    const sky = new THREE.Mesh(new THREE.SphereGeometry(150, 32, 16), m);
+    sky.renderOrder = -1;
+    this.scene.add(sky);
+  }
+
+  private debris: THREE.Mesh[] = [];
+
+  /** A few rock chunks drifting around the floating slab. */
+  private addDebris() {
+    const mat = new THREE.MeshStandardMaterial({ color: '#5a4636', roughness: 1, flatShading: true });
+    let seed = 42;
+    const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    for (let i = 0; i < 10; i++) {
+      const g = new THREE.DodecahedronGeometry(0.1 + rnd() * 0.26, 0);
+      const r = new THREE.Mesh(g, mat);
+      // beside and behind the slab, never between it and the camera
+      const a = Math.PI * (0.85 + rnd() * 1.3);
+      const dist = 9 + rnd() * 8;
+      r.position.set(Math.cos(a) * dist, -5 + rnd() * 6, Math.sin(a) * dist);
+      r.userData.spin = new THREE.Vector3(rnd() - 0.5, rnd() - 0.5, rnd() - 0.5).multiplyScalar(0.4);
+      r.userData.y0 = r.position.y;
+      r.userData.ph = rnd() * 6.28;
+      this.scene.add(r);
+      this.debris.push(r);
+    }
   }
 
   private addStars() {
@@ -144,7 +191,17 @@ export class World {
     this.shake = Math.max(this.shake, Math.min(0.35, strength));
   }
 
+  private clock = 0;
+
   update(dt: number) {
+    this.clock += dt;
+    if (!this.reducedMotion) {
+      for (const r of this.debris) {
+        r.rotation.x += r.userData.spin.x * dt;
+        r.rotation.y += r.userData.spin.y * dt;
+        r.position.y = r.userData.y0 + Math.sin(this.clock * 0.4 + r.userData.ph) * 0.15;
+      }
+    }
     const k = 1 - Math.exp(-dt * 6);
     const o = this.orbit;
     const g = this.orbitGoal;

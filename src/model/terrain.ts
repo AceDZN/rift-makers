@@ -559,8 +559,9 @@ export function fillWater(nx: number, nz: number, elev: Float32Array, sea: numbe
     }
   }
   // closed basins below sea level: salty lakes (the Dead Sea case)
+  const seen = new Uint8Array(N);
   for (let k = 0; k < N; k++) {
-    if (waterKind[k] || elev[k] >= sea) continue;
+    if (waterKind[k] || seen[k] || elev[k] >= sea) continue;
     const comp: number[] = [k];
     waterKind[k] = 2;
     let min = elev[k];
@@ -579,6 +580,7 @@ export function fillWater(nx: number, nz: number, elev: Float32Array, sea: numbe
     }
     const surface = Math.min(sea - 1, min + 0.41 * Math.abs(min));
     for (const c of comp) {
+      seen[c] = 1; // a dry basin rim is not a second lake
       if (elev[c] < surface) water[c] = surface;
       else waterKind[c] = 0;
     }

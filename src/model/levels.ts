@@ -13,6 +13,7 @@ import type { Heat, Plate, Seam } from './heat.ts';
 import { rectPoly } from './heat.ts';
 import type { LayerId } from './earth.ts';
 import { type Vec2, v } from './geo.ts';
+import { riftFloorFromRelief } from './israel.ts';
 
 export type Kind =
   | 'heat' // place heat, commit a duration, judge the landscape
@@ -197,10 +198,11 @@ const x5 = (p: Piece): Piece => ({
 const URL8 = 'https://geography.workbook.co.il/grade-8/chapter-4/';
 const URL9 = 'https://geography.workbook.co.il/grade-9/chapter-2/';
 
+// The rift floor comes from real relief (ETOPO1, see israel.ts and ASSETS.md).
 const ISRAEL_RIFT: RiftProfile = {
   widthKm: 22,
   fullAtKm: 45,
-  floor: [[0, 70], [0.12, -20], [0.18, -210], [0.3, -250], [0.5, -300], [0.7, -790], [0.85, -240], [1, 120]],
+  floor: riftFloorFromRelief(),
 };
 
 // ───────── levels ─────────

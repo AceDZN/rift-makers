@@ -64,7 +64,7 @@ void main() {
   float u = vUv.x;
   float h = vUv.y; // 1 top, 0 bottom
   float s = sin(3.14159 * h);
-  float psi = 0.18 * sin(u * 6.2831 * 1.5 + 0.7) * s;
+  float psi = 0.03 * sin(u * 6.2831 * 1.5 + 0.7) * s;
   float hot = 0.0;
   float cold = 0.0;
   for (int i = 0; i < 8; i++) {
@@ -80,7 +80,9 @@ void main() {
   }
   float stripes = fract(psi * 5.0 - uTime * 0.12);
   float ribbon = smoothstep(0.0, 0.08, stripes) * (1.0 - smoothstep(0.12, 0.3, stripes));
+  ribbon *= smoothstep(0.015, 0.09, abs(psi)) * 0.8 + 0.2;
   float t = 0.38 + 0.32 * (1.0 - h) + 0.55 * hot * (0.6 + 0.4 * h) - 0.25 * cold;
+  t += 0.5 * smoothstep(0.16, 0.0, h); // the core glows below
   t += ribbon * 0.22;
   vec3 c = ramp(clamp(t, 0.0, 1.0));
   vec3 blue = vec3(0.15, 0.45, 1.0);
@@ -204,7 +206,7 @@ export class SlabView {
     this.W = def.base.widthKm;
     this.D = def.base.depthKm;
     this.S = 10 / Math.max(this.W, this.D * 1.15);
-    this.yPerM = 0.00016 * (def.relief ?? 1);
+    this.yPerM = 0.00024 * (def.relief ?? 1);
     this.wallMat = new THREE.ShaderMaterial({ vertexShader: WALL_VS, fragmentShader: WALL_FS, uniforms: { uBottom: { value: CRUST_BOTTOM }, uTime: { value: 0 } } });
     this.waterMat = new THREE.ShaderMaterial({
       vertexShader: WATER_VS,
@@ -443,8 +445,47 @@ export class SlabView {
     depth.needsUpdate = true;
     this.terrainMesh.geometry.computeVertexNormals();
     this.terrainMesh.geometry.computeBoundingSphere();
+    this.placeTrees(t);
     this.waterMesh!.geometry.computeBoundingSphere();
     this.buildWalls(t);
+  }
+
+  private trees: THREE.InstancedMesh | null = null;
+
+  /** Dark tree clumps on green land; fixed spots per level, so they ride nothing but stay believable. */
+  private placeTrees(t: Terrain) {
+    const N = 220;
+    if (!this.trees) {
+      const g = new THREE.IcosahedronGeometry(0.075, 0);
+      g.scale(1, 1.35, 1);
+      g.translate(0, 0.08, 0);
+      this.trees = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ color: '#2f5a24', roughness: 0.9, flatShading: true }), N);
+      this.trees.castShadow = true;
+      this.group.add(this.trees);
+    }
+    const m = new THREE.Matrix4();
+    const q = new THREE.Quaternion();
+    const sc = new THREE.Vector3();
+    let n = 0;
+    let seed = this.def.id * 7919 + 17;
+    const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    for (let tries = 0; tries < N * 6 && n < N; tries++) {
+      const x = rnd() * this.W;
+      const z = rnd() * this.D;
+      const k = Math.round((z / t.depthKm) * (t.nz - 1)) * t.nx + Math.round((x / t.widthKm) * (t.nx - 1));
+      const mat = t.mat[k];
+      if ((mat !== MAT.grass && mat !== MAT.fertile) || !Number.isNaN(t.water[k]) || t.elev[k] > 2200 || t.elev[k] < 2) continue;
+      // clumps: keep a tree only where low-frequency noise says forest
+      if (Math.sin(x * 0.013 + this.def.id) * Math.cos(z * 0.017) < 0.15) continue;
+      const p = this.toWorld(x, z);
+      const s0 = 0.7 + rnd() * 0.7;
+      sc.set(s0, s0, s0);
+      q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), rnd() * 6.28);
+      m.compose(new THREE.Vector3(p.x, this.groundY(x, z), p.z), q, sc);
+      this.trees.setMatrixAt(n++, m);
+    }
+    this.trees.count = n;
+    this.trees.instanceMatrix.needsUpdate = true;
   }
 
   private buildWalls(t: Terrain) {

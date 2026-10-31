@@ -194,3 +194,12 @@ Notes on the reused models:
 **Total `public/models/*.glb`: 10,616,048 B (≈10.1 MiB) for 14 models.** The largest file is scientist.glb at 1.88 MB. Everything is under the 3 MB per model and 20 MB total targets.
 
 The raw downloads (`assets-src/`) are source material; they don't need to ship.
+
+## Relief data (level 18, Israel)
+
+- **Source:** NOAA ETOPO1 global relief (ERDDAP dataset `etopo180`, 1 arc-minute), fetched once from `https://coastwatch.pfeg.noaa.gov/erddap/griddap/etopo180.csv` for 29.4–33.4°N, 34.1–36.0°E with stride 2 (2 arc-minutes). ETOPO1 is a U.S. Government work in the public domain.
+- **Raw file:** `assets-src/relief/etopo1-israel.csv` (7,018 points).
+- **Bundled file:** `src/data/israel-relief.json` (121 × 58 grid of whole metres, 30 KB), built by `node scripts/build-relief.mjs`.
+- **Use:** `src/model/israel.ts` reads the lowest point of the rift (35.2–35.8°E) from 33.1°N (Hula) to 30.3°N (Arava divide) and gives it to the level-18 rift as its floor. ETOPO1 stores lake surfaces, so the Dead Sea (−415 m surface, about 310 m deep) and the Kinneret (−216 m, about 43 m deep) get bowl-shaped beds from published depths; the game's lake then settles at −424 m. The slab is stylized: 260 km of slab stand for about 310 km of rift, and the vertical scale is exaggerated.
+- **Checks:** `tests/israel.test.ts` compares the solved slab with the real cross-section at 31.7°N (coast < ridge, rift lowest, plateau high) and checks that the Dead Sea is the lowest place, at the right latitude and within 80 m of its real level.
+- No political borders are drawn or used.

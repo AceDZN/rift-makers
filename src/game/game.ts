@@ -104,8 +104,8 @@ export class Game {
       this.slab = new SlabView(d);
       this.world.root.add(this.slab.group);
       const sl = this.slab;
-      const r = Math.hypot(sl.halfW, sl.halfD, 2.6);
-      this.world.frame(r, { az: -0.3, polar: 1.0, target: new THREE.Vector3(0, -2.0, 0) });
+      const r = Math.hypot(sl.halfW, sl.halfD * 0.8, 2.4) * 0.9;
+      this.world.frame(r, { az: -0.3, polar: 0.95, target: new THREE.Vector3(0, -1.9, 0) });
       this.syncTerrain(true);
       this.buildLevelActors();
     }
