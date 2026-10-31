@@ -44,7 +44,7 @@ export function commissionDef(p: CommissionParams): LevelDef {
     id,
     world: 4 as const,
     key: `commission-${p.n}`,
-    title: `${TITLES[p.kind]} ${p.n}`,
+    title: TITLES[p.kind],
     module: URL8,
     tag: 'הזמנה' as const,
     kind: 'heat' as const,

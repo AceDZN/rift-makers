@@ -881,3 +881,13 @@ button:disabled {
 .bubble.sad {
   font-size: 15px;
 }
+
+.world.commissions {
+  grid-column: 1 / -1;
+}
+
+.world.commissions .clist {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+}

@@ -487,15 +487,17 @@ export class Hud {
     if (COMMISSION_LEVELS.length) {
       const open = isUnlocked(g.progress, COMMISSION_LEVELS[0].id);
       const box = this.el('div', 'world commissions', `<h3>הזמנות כוכב <span class="en ltr">Planet commissions</span></h3><p class="note">${open ? 'שלבים שנוצרו במחשב ונבדקו שיש להם פתרון.' : 'נפתחות אחרי שלב הגמר.'}</p>`);
-      for (const l of COMMISSION_LEVELS) {
+      const list = this.el('div', 'clist');
+      box.appendChild(list);
+      if (open) for (const l of COMMISSION_LEVELS) {
         const st = g.progress.stars[l.id] ?? 0;
         const b = this.button(
           'lvl',
-          `<span class="num">${ltr(open ? l.id - 100 : '🔒')}</span><span class="name">${l.title}<span class="tag">${l.tag}</span></span><span class="st">${starsHtml(st)}</span>`,
+          `<span class="num">${ltr(l.id - 100)}</span><span class="name">${l.title}<span class="tag">${l.tag}</span></span><span class="st">${starsHtml(st)}</span>`,
           () => g.startLevel(l.id),
-          { disabled: !open, label: `${l.title}${open ? '' : ', נעול'}` },
+          { label: l.title },
         );
-        box.appendChild(b);
+        list.appendChild(b);
       }
       worlds.appendChild(box);
     }
