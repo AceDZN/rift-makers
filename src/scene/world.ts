@@ -29,7 +29,7 @@ export class World {
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.05;
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
     const canvas = this.renderer.domElement;
     canvas.setAttribute('aria-label', 'לוח כוכב צף: הקרום, המעטפת והנוף');
     canvas.tabIndex = 0;

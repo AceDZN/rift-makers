@@ -29,10 +29,10 @@ test('sea floor gets older with distance from the ridge on both sides', () => {
 test('rocks: basalt where plates part, marble only from limestone, granite only after long deep squeezing', () => {
   const s = SOLUTIONS[16]();
   assert.equal(s.rockAt(600, 250), 'basalt');
-  assert.equal(s.rockAt(300, 250), 'granite');
+  assert.equal(s.rockAt(170, 250), 'granite');
   // the same collision, stopped early: folded layers, no granite yet
   const early = heatRun(16, [['drip', 300, 250], ['plume', 600, 250]], 4);
-  assert.notEqual(early.rockAt(300, 250), 'granite');
+  assert.notEqual(early.rockAt(170, 250), 'granite');
   // marble appears only next to limestone
   const marble = s.hammered.find((h) => h.rock === 'marble')!;
   assert.ok(marble, 'the solution found marble');

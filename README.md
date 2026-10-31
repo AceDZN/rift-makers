@@ -60,7 +60,7 @@ Keys use physical positions, so they work with a Hebrew keyboard layout. North i
 - **Pure model, tested:** the tests (`npm test`) cover all levels, each boundary type from the right heat, continent–continent collisions without volcanoes, subduction with trench and arc, the level-7 "fishing in the valley" mistake, 2 Richter units ≈ 1,000× energy, site choice versus boundaries, constant and random strategies failing, rate × time, sea-floor age, rock rules, and the final slab against real relief.
 - **3D scene:** one WebGL canvas with a floating slab, strata walls, a mantle cutaway whose convection ribbons follow your heat, a glowing core, water with depth colour, tree clumps, volcano smoke, seams and flow arrows. Tripo models: rigged pebble villagers (idle, cheer, panic, fall, build, walk), a rigged scientist, a rigged dog, houses with a "413" variant, boat, seismograph, warning tower, hot spring, ammonite, observatory, trees. See [ASSETS.md](ASSETS.md).
 - **Real relief for Israel:** level 18's rift floor comes from bundled NOAA ETOPO1 data (public domain), and tests check the built slab against the real belts and Dead Sea level.
-- **Feedback:** a one- or two-line Hebrew explanation after every mistake; restart keeps your heat so you change it on purpose; stars = 1 + no mistakes + a goal met cleanly − a hint.
+- **Feedback:** a one- or two-line Hebrew explanation after every mistake; restart keeps your heat so you change it on purpose (and is refused while time is running); stars = 1 + no mistakes + a goal met cleanly − a hint. Mistakes and hints stay with a level until it is won, so leaving and coming back doesn't wipe them.
 - **Accessibility:** Hebrew RTL with Rubik bundled, numbers in LTR spans, feedback never by colour alone (icons and words), mute, pause (and auto-pause when the tab is hidden during a run), reduced motion (follows the system setting), keyboard play, works at phone width.
 - **Progress and learning events:** stars per level and first-attempt events (unaided or hinted, mistakes) stay in `localStorage`; nothing leaves the browser.
 - **Test hooks:** `window.render_game_to_text()` and a deterministic `window.advanceTime(ms)`.
@@ -94,5 +94,5 @@ npx vercel --prod
 - [CURRICULUM.md](CURRICULUM.md): Workbook modules and facts.
 - [ASSETS.md](ASSETS.md): models, credits, relief data.
 - [docs/VISUAL_REVIEW.md](docs/VISUAL_REVIEW.md): real screenshots against the visual targets.
-- [PLAYTEST.md](PLAYTEST.md): the independent playtest.
+- [PLAYTEST.md](PLAYTEST.md): the independent playtest and what was fixed.
 - [progress.md](progress.md): build log.

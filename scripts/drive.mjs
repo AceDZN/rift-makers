@@ -34,7 +34,7 @@ const PLAN = {
   13: [act(`s => { s.predict('energy', '1000'); s.chooseCopy('valley-copies'); }`), { shot: 'mid' }, act(`s => s.runCopyQuakes()`), { wait: 4000 }],
   14: [act(`s => { s.chooseCove('north'); s.chooseHill('cliff'); }`), { shot: 'mid' }, act(`s => s.runTsunami()`), { wait: 4000 }],
   15: [act(`s => { s.chooseTownSite('tiberias', 't-hill'); s.chooseTownSite('jericho', 'j-fan'); s.chooseTownSite('shechem', 'y-ridge'); }`), { shot: 'mid' }, act(`s => s.runTownQuakes()`), { wait: 4000 }],
-  16: [heat([['drip', 300, 250], ['plume', 600, 250]], 14), act(`s => { for (const [x, z] of [[600, 250], [300, 250], [120, 250], [265, 250]]) s.hammer(x, z); }`)],
+  16: [heat([['drip', 300, 250], ['plume', 600, 250]], 14), act(`s => { for (const [x, z] of [[600, 250], [170, 250], [70, 250], [110, 250]]) s.hammer(x, z); }`)],
   17: [heat([], 30), { shot: 'mid' }, heat([['drip', 60, 40]], 30)],
   18: [heat([['drip', 88, 130], ['plume', 180, 50]], 8), { shot: 'mid' }, act(`s => { s.chooseTownSite('coast', 'c-plain'); s.chooseTownSite('ridge', 'r-crest'); s.chooseTownSite('valley', 'v-terrace'); s.runTownQuakes(); }`), { wait: 4000 }],
 };

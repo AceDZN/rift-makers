@@ -111,7 +111,7 @@ export class Hud {
     const top = this.el('div', 'topbar');
     const title = this.el('div', 'title-card');
     const best = g.progress.stars[s.def.id] ?? 0;
-    title.innerHTML = `<div class="title-row"><span>${s.def.id > 100 ? '' : ltr(s.def.id) + '. '}${s.def.title}</span><span class="stars" aria-label="${best} כוכבים">${starsHtml(s.outcome?.stars ?? best)}</span></div><div class="goal">${s.def.goal}</div>`;
+    title.innerHTML = `<div class="title-row"><span>${s.def.id > 100 ? '' : ltr(s.def.id) + '. '}${s.def.title}</span><span class="stars" aria-label="${s.outcome?.stars ?? best} כוכבים">${starsHtml(s.outcome?.stars ?? best)}</span></div><div class="goal">${s.def.goal}</div>`;
     top.appendChild(title);
     const btns = this.el('div', 'round-btns');
     btns.appendChild(this.button('rbtn', ICON.pause + '<span class="cap">עצירה</span>', () => {
@@ -151,7 +151,7 @@ export class Hud {
     if (d.kind === 'seismo') bar.appendChild(this.seismoPanel());
     if (d.kind === 'dig') bar.appendChild(this.digPanel());
     if (d.kind === 'wegener' && !s.accepted) bar.appendChild(this.wegenerPanel());
-    if (d.kind === 'site' && d.site?.kind === 'quakes') bar.appendChild(this.info(s.siteReport ? `בעיר הנמל הורגשו ${ltr(s.siteReport.felt)} רעידות ב־1,000 שנה. המרחק מהגבול הקרוב: ${ltr(s.siteReport.nearestKm + ' km')}` : 'הקישו על החוף כדי לייעץ איפה לבנות את עיר הנמל. אחר כך נריץ 1,000 שנים של רעידות.'));
+    if (d.kind === 'site' && d.site?.kind === 'quakes') bar.appendChild(this.info(s.siteReport ? `בעיר הנמל הורגשו ${ltr(s.siteReport.felt)} רעידות ב־1,000 שנה. המרחק מהגבול הקרוב: ${ltr(s.siteReport.nearestKm) + ' ק״מ'}` : 'הקישו על החוף כדי לייעץ איפה לבנות את עיר הנמל. אחר כך נריץ 1,000 שנים של רעידות.'));
     if (d.kind === 'copy') bar.appendChild(this.copyPanel());
     if (d.site?.kind === 'tsunami') bar.appendChild(this.tsunamiPanel());
     if ((d.site?.kind === 'rebuild' || (d.kind === 'israel' && s.phase === 'sites'))) bar.appendChild(this.townsPanel());
@@ -181,10 +181,13 @@ export class Hud {
     const rate = d.fixedRate ?? (s.phase !== 'plan' || s.t > 0 ? m?.rateCmYr : undefined);
     const ro = this.el('div', 'readout');
     const rateTxt = rate !== undefined ? ltr(`${fmt(rate)}`) : '?';
-    const km = rate !== undefined ? ltr(fmt(displacementKm(rate, s.duration))) : '?';
+    // the distance is the student's to work out: it appears once the time is committed
+    const km = rate !== undefined && s.phase !== 'plan' ? ltr(fmt(displacementKm(rate, s.duration))) : '?';
     ro.innerHTML = `<div class="eq">${rateTxt} ס״מ/שנה × ${ltr(fmt(s.duration))} מיליון שנה</div><div class="km">= ${km} ק״מ</div>`;
     ro.setAttribute('aria-label', 'קצב כפול זמן שווה מרחק');
-    wrap.appendChild(ro);
+    // one seam, one rate: elsewhere the equation means nothing
+    const oneRate = (d.seams?.length ?? 0) === 1 && !['wegener', 'rocks', 'israel'].includes(d.kind);
+    if (oneRate) wrap.appendChild(ro);
     if (!d.duration.fixed) {
       const st = this.el('div', 'stepper');
       const can = s.phase === 'plan';
@@ -204,6 +207,7 @@ export class Hud {
     const d = s.def;
     const tray = this.el('div', 'panel tray');
     const plan = s.phase === 'plan';
+    if (d.anyHeat !== undefined) tray.appendChild(this.el('div', 'tray-note', d.anyHeat === 1 ? 'חום אחד: פלומה או טפטוף' : `${ltr(d.anyHeat)} מקורות חום, מכל סוג`));
     const anyLeft = (k: 'plume' | 'drip') => (d.anyHeat !== undefined ? d.anyHeat : ((k === 'plume' ? d.plumes : d.drips) ?? 0)) > 0;
     for (const k of ['plume', 'drip'] as const) {
       if (!anyLeft(k)) continue;
@@ -319,17 +323,18 @@ export class Hud {
     const s = g.session!;
     const st = s.def.site!;
     const p = this.el('div', 'panel choices');
-    p.appendChild(this.el('span', 'qlabel', 'בחרו מפרץ לנמל וגבעה למילוט (גם על המפה):'));
-    for (const c of st.sites) {
+    const ts = st.tsunami!;
+    p.appendChild(this.el('span', 'qlabel', `צפוי גל בגובה ${ltr(ts.runupM)} מ׳, כ־${ltr(ts.arrivalMin)} דקות אחרי הרעידה. הולכים ${ltr(Math.round(ts.walkKmPerMin * 60))} ק״מ בשעה. בחרו מפרץ לנמל וגבעה למילוט (גם על המפה):`));
+    for (const c of g.shuffled(st.sites)) {
       const sel = s.cove === c.id;
       p.appendChild(this.button(`choice ${sel ? 'sel' : ''}`, '⚓ ' + c.he, () => g.act((ss) => ss.chooseCove(c.id)), { pressed: sel }));
     }
-    for (const h of st.hills!) {
+    for (const h of g.shuffled(st.hills!)) {
       const sel = s.hill === h.id;
-      p.appendChild(this.button(`choice ${sel ? 'sel' : ''}`, `⛰ ${h.he} ${ltr(h.elev + ' m')}`, () => g.act((ss) => ss.chooseHill(h.id)), { pressed: sel }));
+      p.appendChild(this.button(`choice ${sel ? 'sel' : ''}`, `⛰ ${h.he} ${ltr(h.elev)} מ׳`, () => g.act((ss) => ss.chooseHill(h.id)), { pressed: sel }));
     }
     p.appendChild(this.button('runbtn', '<span class="play">🌊</span><span>רעידה בתעלה</span>', () => g.act((ss) => ss.runTsunami()), { disabled: !s.cove || !s.hill || !!s.outcome }));
-    if (s.evac) p.appendChild(this.el('span', 'qlabel', `הליכה: ${ltr(Math.round(s.evac.walkMin) + ' min')} · עד הגל: ${ltr(Math.round(s.evac.warningMin) + ' min')}`));
+    if (s.evac) p.appendChild(this.el('span', 'qlabel', `הליכה: ${ltr(Math.round(s.evac.walkMin)) + ' דק׳'} · עד הגל: ${ltr(Math.round(s.evac.warningMin)) + ' דק׳'}`));
     return p;
   }
 
@@ -365,8 +370,8 @@ export class Hud {
   private fossilPanel(): HTMLElement {
     const s = this.game.session!;
     const f = s.fossilState();
-    const top = f.topM === null ? 'אין עדיין שכבות צדפים' : `שכבות הצדפים בגובה ${ltr(Math.round(f.topM) + ' m')}`;
-    return this.el('div', 'panel', `<div class="qlabel">שכבות: ${ltr(f.layers)} · ${top} · היעד: ${ltr('700 m')} · עברו ${ltr(fmt(s.t))} מתוך ${ltr(100)} מיליון שנה</div>`);
+    const top = f.topM === null ? 'אין עדיין שכבות צדפים' : `שכבות הצדפים בגובה ${ltr(Math.round(f.topM)) + ' מ׳'}`;
+    return this.el('div', 'panel', `<div class="qlabel">שכבות: ${ltr(f.layers)} · ${top} · היעד: ${ltr(700)} מ׳ · עברו ${ltr(fmt(s.t))} מתוך ${ltr(100)} מיליון שנה</div>`);
   }
 
   // ───────── cards ─────────
@@ -451,10 +456,12 @@ export class Hud {
       g.paused = false;
       g.touch();
     }));
-    row.appendChild(this.button('btn', 'התחילו מחדש', () => {
-      g.paused = false;
-      g.restart();
-    }));
+    // mid-run the time is spent: no free rewind
+    if (g.session?.phase !== 'running')
+      row.appendChild(this.button('btn', 'התחילו מחדש', () => {
+        g.paused = false;
+        g.restart();
+      }));
     row.appendChild(this.button('btn', 'לבחירת שלב', () => g.exitToSelect()));
     row.appendChild(this.button('btn', g.audio.muted ? 'הפעלת צליל' : 'השתקה', () => g.toggleMute()));
     row.appendChild(this.button('btn', g.reducedMotion ? 'תנועה מלאה' : 'פחות תנועה', () => g.toggleReducedMotion()));

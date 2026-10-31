@@ -25,7 +25,7 @@ import { type LevelDef, type RockId, levelById } from './levels.ts';
 import { type Heat, type HeatKind, type SeamMotion, flowAt, plateAt, plateVelocity, seamMotion } from './heat.ts';
 import { type LayerId, LAYERS, mantleTempAt, readStation, type StationReading } from './earth.ts';
 import { RETROFIT_FACTOR, energyRatio, evacuate, runQuakes, shakingAt, type EvacResult, type House, type TownReport } from './quake.ts';
-import { type RockSample } from './rocks.ts';
+import { type RockSample, ROCK_FAMILY_HE, ROCK_HE } from './rocks.ts';
 import { reasonLine } from './explain.ts';
 
 export type Phase = 'plan' | 'running' | 'collect' | 'sites' | 'review' | 'done';
@@ -202,8 +202,15 @@ export class Session {
   }
 
   /** Back to the start of deep time. Heat placements stay. */
-  restart() {
-    if (this.outcome) return;
+  /** Mistakes and hints from earlier attempts at this level that never won: leaving and coming back doesn't wipe them. */
+  carryOver(mistakes: number, hints: number) {
+    this.mistakes = Math.max(this.mistakes, mistakes);
+    this.hints = Math.max(this.hints, hints);
+  }
+
+  /** Back to the start of deep time with the heat kept. Not mid-run: time already spent is spent. */
+  restart(): boolean {
+    if (this.outcome || this.phase === 'running') return false;
     this.resetPhase();
     for (const h of this.heats) h.bornMyr = 0;
     this.hammered = [];
@@ -215,6 +222,7 @@ export class Session {
     this.announced.clear();
     this.feedback = null;
     this.events.push({ type: 'restart' });
+    return true;
   }
 
   // ───────── heat ─────────
@@ -600,7 +608,7 @@ export class Session {
       const pl = this.heats.find((h) => h.kind === 'plume')!;
       return this.fail('heatOffUpwelling', { value: Math.abs(pl.x - d.seamAtPlume.upwellingX) });
     }
-    return this.fail(w.reason, { value: w.value ?? 0 });
+    return this.fail(w.reason, { value: w.value ?? 0, fixed: this.def.duration.fixed ? 1 : 0 });
   }
 
   private judgeArc() {
@@ -997,31 +1005,41 @@ export class Session {
     if (!collapsed.length) return this.finish();
     const t = towns.find((x) => x.id === collapsed[0])!;
     const s = sites.find((x) => x.id === this.townSites[t.id])!;
-    this.mistake('houseFell', { town: t.he, where: `ב${s.he}`, ground: s.ground ?? 1 });
+    this.mistake('houseFell', { town: t.he, where: `במקום "${s.he}"`, ground: s.ground ?? 1, edge: /מצוק|מדרון/.test(s.he) ? 1 : 0, others: towns.filter((x) => collapsed.includes(x.id) && x !== t).map((x) => x.he).join(', ') });
   }
 
   // ───────── level 16: rock orders ─────────
 
+  /** What the hammer finds here, read from the landscape as it now stands (not the original seam lines). */
   rockAt(x: number, z: number): RockSample {
     const p = v(x, z);
+    const ter = this.terrain();
+    const k = cellAt(ter, p);
     const base = baseSampler(this.def.base, 0);
     for (const b of this.boundaries()) {
       const s = boundaryDisp(b, this.t);
       const { t, n, length } = boundaryFrame(b);
       const rel = sub(p, b.p0);
-      const d = dot(rel, n);
       const u = dot(rel, t);
       if (u < -20 || u > length + 20) continue;
-      if (b.type === 'pull' && Math.abs(d) <= s / 2 + 4 && s >= 8) return 'basalt';
-      if (b.type === 'push') {
-        if (Math.abs(d) <= 22) return s >= 120 && this.t >= 10 ? 'granite' : 'folded';
-        if (Math.abs(d) <= 70 && s >= 40) {
-          const src = base(add(p, scale(n, Math.sign(d) * Math.min(s / 2, 60))));
-          if (src.mat === MAT.limestone || base(p).mat === MAT.limestone) return 'marble';
+      if (b.type === 'pull' && s >= 8 && ter.mat[k] === MAT.basalt) return 'basalt';
+      if (b.type === 'push' && s >= 40) {
+        // the crest of the range this collision raised, along this cross-section
+        const foot = add(b.p0, scale(t, u));
+        let crest = 0;
+        let top = -Infinity;
+        for (let d = -260; d <= 260; d += 10) {
+          const e = ter.elev[cellAt(ter, add(foot, scale(n, d)))];
+          if (e > top) [top, crest] = [e, d];
         }
+        const off = Math.abs(dot(sub(p, foot), n) - crest);
+        if (top < 1200) continue;
+        if (off <= 30) return s >= 120 && this.t >= 10 ? 'granite' : 'folded';
+        if (off <= 80 && (ter.mat[k] === MAT.limestone || base(p).mat === MAT.limestone)) return 'marble';
       }
     }
-    return base(p).mat === MAT.limestone ? 'limestone' : 'soil';
+    if (ter.mat[k] === MAT.basalt) return 'basalt';
+    return ter.mat[k] === MAT.limestone || base(p).mat === MAT.limestone ? 'limestone' : 'soil';
   }
 
   hammer(x: number, z: number): RockSample | null {
@@ -1030,7 +1048,10 @@ export class Session {
     const rock = this.rockAt(x, z);
     this.hammered.push({ x: Math.round(x), z: Math.round(z), rock });
     this.events.push({ type: 'sample', x, z, value: rock });
-    if ((r.targets as string[]).includes(rock)) this.collected.add(rock as RockId);
+    const wanted = (r.targets as string[]).includes(rock);
+    if (wanted) this.collected.add(rock as RockId);
+    // every sample says what it is and how it formed, wanted or not
+    this.say(wanted ? 'good' : 'info', `${ROCK_HE[rock]}: ${ROCK_FAMILY_HE[rock]}.`);
     if (this.hammered.length > 6) this.extraOk = false;
     const missing = r.targets.filter((t) => !this.collected.has(t));
     if (!missing.length) {

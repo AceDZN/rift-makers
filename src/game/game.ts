@@ -11,7 +11,7 @@ import { LEVELS, type LevelDef } from '../model/levels.ts';
 import type { HeatKind } from '../model/heat.ts';
 import { type Vec2, v } from '../model/geo.ts';
 import { Audio } from './audio.ts';
-import { loadProgress, recordResult, type Progress } from './progress.ts';
+import { loadProgress, recordPending, recordResult, type Progress } from './progress.ts';
 import { postToHost } from '../host.ts';
 import { ROCK_HE } from '../model/rocks.ts';
 
@@ -83,7 +83,10 @@ export class Game {
 
   startLevel(id: number) {
     this.teardown();
+    this.orderSeed = Math.random();
     const s = new Session(id);
+    const left = this.progress.pending[id];
+    if (left) s.carryOver(left.mistakes, left.hints);
     this.session = s;
     this.screen = 'play';
     this.tool = null;
@@ -108,6 +111,7 @@ export class Game {
       this.world.frame(r, { az: -0.3, polar: 0.95, target: new THREE.Vector3(0, -1.9, 0) });
       this.syncTerrain(true);
       this.buildLevelActors();
+      this.syncHeats(); // heat already burning in the level is drawn from the start
     }
     postToHost({ type: 'level-start', level: id });
     this.touch();
@@ -198,8 +202,7 @@ export class Game {
 
   restart() {
     const s = this.session;
-    if (!s) return;
-    s.restart();
+    if (!s || !s.restart()) return;
     this.rebuildAfterRestart();
     this.afterAction();
   }
@@ -271,7 +274,9 @@ export class Game {
     if (!s || !this.slab) return;
     this.slab.setHeats(s.heats, this.selectedHeat);
     const planning = s.phase === 'plan' && s.def.kind !== 'wegener';
-    const showFlow = planning && (s.heats.length > 0 || (this.hintShown && s.def.hintShows === 'flow'));
+    // in a prediction level the arrows would give the answer away: they come only with the hint
+    const free = s.heats.length > 0 && s.def.kind !== 'predict';
+    const showFlow = planning && (free || (this.hintShown && s.def.hintShows === 'flow'));
     this.slab.setFlow(showFlow ? (x, z) => s.flowAt(x, z) : null, this.hintShown && s.def.hintShows === 'flow');
   }
 
@@ -571,7 +576,7 @@ export class Game {
       el.dataset.cove = c.id;
     }
     for (const h of st.hills!) {
-      const el = this.label(`⛰ ${h.he} <span class="ltr">${h.elev} m</span>`, this.kmPoint(h.x, h.z, 0.45), 'pin', () => this.act((ss) => ss.chooseHill(h.id)));
+      const el = this.label(`⛰ ${h.he} <span class="ltr">${h.elev}</span> מ׳`, this.kmPoint(h.x, h.z, 0.45), 'pin', () => this.act((ss) => ss.chooseHill(h.id)));
       el.dataset.hill = h.id;
     }
   }
@@ -596,6 +601,7 @@ export class Game {
     if (!s) return;
     const evs = s.events.splice(0);
     for (const e of evs) this.effect(e);
+    if (!s.outcome && evs.some((e) => e.type === 'mistake' || e.type === 'hint')) recordPending(this.progress, s.def.id, s.mistakes, s.hints);
   }
 
   private effect(e: GameEvent) {
@@ -812,7 +818,7 @@ export class Game {
     });
     for (const l of this.labels) {
       const p = l.at();
-      if (!p) {
+      if (!p || this.labelHidden(l.el)) {
         l.el.style.display = 'none';
         continue;
       }
@@ -822,8 +828,15 @@ export class Game {
         continue;
       }
       l.el.style.display = '';
-      l.el.style.left = `${((q.x + 1) / 2) * w}px`;
-      l.el.style.top = `${((1 - q.y) / 2) * h}px`;
+      let x = ((q.x + 1) / 2) * w;
+      let y = ((1 - q.y) / 2) * h;
+      // the compass sits on the slab corner, which can leave a narrow screen
+      if (l.el.classList.contains('compass')) {
+        x = Math.min(Math.max(x, 44), w - 44);
+        y = Math.min(Math.max(y, 90), h - 40);
+      }
+      l.el.style.left = `${x}px`;
+      l.el.style.top = `${y}px`;
       l.el.style.marginTop = '0px';
     }
     this.declutterLabels();
@@ -839,6 +852,12 @@ export class Game {
     }
   }
 
+  /** In the final, the town sites appear only once the land is built: no labels while you shape it. */
+  private labelHidden(el: HTMLElement): boolean {
+    const s = this.session;
+    return !!s && s.def.kind === 'israel' && !!el.dataset.site && s.phase !== 'sites' && !s.outcome;
+  }
+
   /** Pins that would overlap stack upward instead, nearest the camera first. */
   private declutterLabels() {
     const shown = this.labels.filter((l) => l.el.style.display !== 'none');
@@ -852,6 +871,8 @@ export class Game {
         if (!hit) break;
         dy = hit.top - 3 - r.bottom;
       }
+      // never drift far from the place a pin names: past two rows, overlap a little instead
+      dy = Math.max(dy, -2.2 * r.height);
       if (dy) l.el.style.marginTop = `${dy}px`;
       placed.push({ left: r.left, right: r.right, top: r.top + dy, bottom: r.bottom + dy });
     }
@@ -1112,9 +1133,20 @@ export class Game {
       return this.afterAction();
     }
     if (this.tool && (this.tool === 'plume' || this.tool === 'drip') && c === 'Enter') {
-      // keyboard placement: drop at the slab centre, then move with the arrows
-      return this.placeHeat(this.tool, s.def.base.widthKm / 2, s.def.base.depthKm / 2);
+      // keyboard placement: drop in the north-west quarter (never a free answer), then move with the arrows
+      return this.placeHeat(this.tool, s.def.base.widthKm / 4, s.def.base.depthKm / 4);
     }
+  }
+
+  /** Choice lists come in a new order on every attempt, so "always the first one" is not a strategy. */
+  private orderSeed = Math.random();
+  shuffled<T extends { id: string }>(xs: T[]): T[] {
+    const h = (id: string) => {
+      let v = Math.floor(this.orderSeed * 1e9);
+      for (const ch of id) v = (v * 31 + ch.charCodeAt(0)) % 1000003;
+      return v;
+    };
+    return [...xs].sort((a, b) => h(a.id) - h(b.id));
   }
 
   levels(): LevelDef[] {

@@ -39,7 +39,14 @@ README, LEVELS.md verified solutions, `tests/rules.test.ts` (rate × time, sea-f
 - The remaining Tripo models now appear where their story is: observatory (8, 11), seismograph stations (12, 13, 15), a dog that bolts in quakes (13, 15), warning tower (14), ammonite (17), hot spring (18).
 - Planet commissions: `scripts/gen-commissions.ts` proposes sea, mountain and arc layouts and brute-forces every heat kind, position (40 km grid) and duration; it keeps a layout only when something wins and at most 15% of tries win. They unlock after the final and are re-checked by `tests/commissions.test.ts`.
 
+## 8. Playtest fixes
+
+An independent playtester tried to break every level (see PLAYTEST.md). Closed the bypasses: mistakes and hints now follow the student across re-entry until the level is won, restart is refused during a run, the L4 readout hides the answer, prediction arrows show only with the hint, L14 options are shuffled with the facts shown up front, the L10 decoy and rotations no longer give the answer away. Also: labels never swallow clicks, fixed heat is drawn from the start, the L16 hammer reads the landscape as it stands, every collapsed town is named, Hebrew units, one shared heat counter, the compass stays on screen on phones, and the deprecated shadow type is gone.
+
 ## Open
+
+- L3 has one layout; a mirrored second round would stop "both plates toward the middle" from always winning.
+- L7 accepts any duration above the minimum.
 
 - Rivers and a fed Kinneret.
 - Recorded sound effects.

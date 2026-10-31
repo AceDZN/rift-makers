@@ -59,3 +59,24 @@ test('time only runs forward', () => {
   assert.equal(s.duration, 8, 'no changing the commitment mid-run');
   assert.equal(s.placeHeat('drip', 300, 300), null, 'no heat edits mid-run');
 });
+
+test('no free rewind: restart is refused while deep time runs', () => {
+  const s = new Session(4);
+  s.setDuration(2);
+  s.run();
+  s.advance(1);
+  assert.equal(s.restart(), false);
+  assert.equal(s.t, 1);
+  assert.equal(s.duration, 2);
+});
+
+test('leaving a level does not wipe its mistakes: a carried mistake caps the stars', () => {
+  const s = new Session(4);
+  s.carryOver(1, 0);
+  s.setDuration(6);
+  s.run();
+  s.runToEnd();
+  assert.equal(s.outcome?.success, true);
+  assert.ok(s.outcome!.stars <= 2);
+  assert.equal(s.unaided, false);
+});

@@ -88,6 +88,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - Author three sub-rounds with different plume/drip layouts (incl. mirrored) so a fixed arrow pattern wins at most one.
 - **Win check:** all committed arrows match the sign of the model's plate velocities.
 - **Verified solution:** predict the western plate moves east and the eastern plate moves west (toward the fixed cold drip), then run 4 Myr: the plates meet and a range rises. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
+- **As built:** one layout; the surface flow arrows show only with the hint, so the prediction can't be read off the slab. The mirrored sub-rounds are not built yet, so "both toward the middle" still wins this layout (PLAYTEST.md #6).
 - **Not-like note:** the prediction is a one-time commit before deep time runs, not a picker for a boundary type.
 
 ### L4 Slow but sure
@@ -277,7 +278,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - Line: "צונאמי הוא לא גל אחד אלא סדרה של גלים".
 - **Constant-strategy check:** "highest hill always" fails when it's farther than wave-1 time. "Harbor in the sheltered bay always" fails on the second round's coast.
 - **Win check:** every villager is above the run-up before each wave's arrival; the harbor survives or is rebuilt.
-- **Verified solution:** the north cove next to the cliff, and the cliff (42 m) as the escape hill; run the trench quake: everyone walks up before the wave. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
+- **Verified solution:** the north cove next to the cliff, and the cliff (42 מ׳) as the escape hill; run the trench quake: everyone walks up before the wave. The options are shuffled per attempt, and the panel shows the wave height, minutes to arrival and walking speed before the first run. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 - **Care:**
   - "The largest wave may not be the first" is OURS, not in the module. It is shown only through play, never as an assessed line; the spoken line stays the module's "לא גל אחד אלא סדרה".
   - High ground is OURS; the module says "תוכניות פינוי".
@@ -329,7 +330,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - Looking for fossils in granite or marble: "מאובנים רק בסלעי משקע".
 - **Constant-strategy check:** "one plume in the middle" yields basalt only (fails 3 of 4). Random heat yields all four under 5%.
 - **Win check:** 4 correct samples collected; each sample's rock has a recorded formation path in the model.
-- **Verified solution:** a cold drip at (300, 250) and a hot plume at (600, 250), 14 Myr; then hammer at 600, 300, 120 and 265 km for basalt, granite, fossil limestone and marble. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
+- **Verified solution:** a cold drip at (300, 250) and a hot plume at (600, 250), 14 Myr; then hammer the new sea floor (600 km), the crest of the new range (170 km), its outer flank (70 km) and the belt between (110 km) for basalt, granite, fossil limestone and marble. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 - **Not-like care:** no cycle wheel and no "apply process" buttons. Rocks only come from what the planet did.
 
 ### L17 Fossils at 700 m

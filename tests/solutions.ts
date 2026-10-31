@@ -72,7 +72,7 @@ export const SOLUTIONS: Record<number, () => Session> = {
   },
   16: () => {
     const s = heatRun(16, [['drip', 300, 250], ['plume', 600, 250]], 14);
-    for (const [x, z] of [[600, 250], [300, 250], [120, 250], [265, 250]]) s.hammer(x, z);
+    for (const [x, z] of [[600, 250], [170, 250], [70, 250], [110, 250]]) s.hammer(x, z);
     return s;
   },
   17: () => {
