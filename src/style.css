@@ -861,3 +861,23 @@ button:disabled {
     animation: none;
   }
 }
+
+.total-stars {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gold);
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 16px;
+  align-self: center;
+}
+
+.btn.big {
+  font-size: 20px;
+  padding: 12px 34px;
+}
+
+.bubble.sad {
+  font-size: 15px;
+}

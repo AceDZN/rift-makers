@@ -587,6 +587,7 @@ export class Game {
         this.audio.sting(false);
         this.audio.chirp(false);
         for (const a of this.villagerActors.values()) a.play(s.def.kind === 'heat' ? 'fall' : 'panic', { once: s.def.kind === 'heat' });
+        if (e.type === 'fail') this.sulk(e.reason);
         break;
       case 'success':
         this.onSuccess();
@@ -737,6 +738,20 @@ export class Game {
     if (this.screen === 'select') this.world.nudgeOrbit(dt * 0.04, 0);
     this.world.update(dt);
     this.updateLabels();
+  }
+
+  /** The villagers say, in a picture and a few words, what they got instead of what they wanted. */
+  private sulk(reason: string) {
+    const said = reason === 'sulkFishing' ? '🎣 רצינו הר…' : reason.startsWith('too') ? '🤔 לא מה שביקשנו' : '😞';
+    for (const a of this.villagerActors.values()) {
+      if (!a.group.userData.villager) continue;
+      const el = this.label(said, () => {
+        const p = a.group.position.clone();
+        p.y += 0.6;
+        return p;
+      }, 'bubble sad', undefined, this.time + 8);
+      el.setAttribute('aria-hidden', 'true');
+    }
   }
 
   private updateLabels() {

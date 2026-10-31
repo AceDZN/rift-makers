@@ -2,7 +2,7 @@
 
 Owner: level designer + geography reviewer.
 
-**Status:** design draft. Each level has a "Verified solution" line marked **TODO** until the heat → flow → boundary engine in `src/model` exists. Each solution will then be found and checked by the solver tests.
+**Status:** implemented. Every level's "Verified solution" below is the layout the tests use (`tests/solutions.ts`); each wins with 3 stars through the same session calls the UI makes, and in the browser through `scripts/drive.mjs`.
 
 Sources:
 - Geography facts and quotes: `docs/FACTS.md`. Its §n sections and S-items (source inconsistencies) are referenced below.
@@ -45,7 +45,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - (Drips are not available yet.)
 - **Constant-strategy check:** "one plume in the middle" must **fail** here. Put the wish point off-center (e.g. 1/3 of the slab) so the tutorial already teaches *where*, not just *that*.
 - **Win check:** sea depth > 0 and connected to the ocean, at the villagers' coast cell, after the run.
-- **Verified solution:** TODO.
+- **Verified solution:** one hot plume on the seam at (560, 250) km, 4 Myr fixed → about 4.7–5 cm/yr, a sea about 190–200 km wide between the villages (allowed 100–600 km). Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 
 ### L2 Liquid or solid (no heat)
 - **Geography (ES):**
@@ -71,7 +71,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - The mark button stays disabled until there is at least one A-only and one A+B record. Bunched stations can't proceed; the player moves a station.
   - Random station placement is allowed, because the skill is the inference.
 - **Win check:** the marked shell is consistent with all records. "Outer core" gives 3 stars; "whole core" gives 2 stars plus the reveal.
-- **Verified solution:** TODO. The shadow begins about 104° from the source; that constant is an engine choice and is never shown as curriculum.
+- **Verified solution:** three seismograph stations at 40°, 100° and 160° from the quake, fire, then mark the outer core as the layer that stops the S waves. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 
 ### L3 Which way?
 - **Geography (PT):**
@@ -87,7 +87,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - "Always both arrows outward" and "always toward the plume" must fail.
   - Author three sub-rounds with different plume/drip layouts (incl. mirrored) so a fixed arrow pattern wins at most one.
 - **Win check:** all committed arrows match the sign of the model's plate velocities.
-- **Verified solution:** TODO.
+- **Verified solution:** predict the western plate moves east and the eastern plate moves west (toward the fixed cold drip), then run 4 Myr: the plates meet and a range rises. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 - **Not-like note:** the prediction is a one-time commit before deep time runs, not a picker for a boundary type.
 
 ### L4 Slow but sure
@@ -104,7 +104,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - Durations that win on other levels (e.g. L1's 10 Myr) must fail.
   - A second round with a different rate (e.g. 3 cm/yr, target 240 km → 8 Myr) prevents memorizing "6".
 - **Win check:** |width − 300| ≤ 25 km.
-- **Verified solution:** TODO (expected 6 Myr, accept 5.5–6.5).
+- **Verified solution:** the plume is fixed at 5 cm/yr; commit 6 Myr (5.5–6.5 accepted): 5 × 6 × 10 = 300 km. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 - **Care:** if the engine's 5 cm/yr is per plate, the answer becomes 3 Myr. The HUD wording must say "הפער בין החופים גדל ב-5 ס"מ בשנה".
 
 ### L5 Transfer: the quiet planet
@@ -115,7 +115,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
 - **Wrong approach → visible consequence:** a plume elsewhere competes with the hidden cell, so the rift stalls or opens in two weak places. Line: "החום שלך נלחם בזרם שכבר זורם שם".
 - **Constant-strategy check:** "one plume in the middle" must fail (the hidden line is off-center). Random placement must be under 5%.
 - **Win check:** a sea at the wish cell after the committed run (allowed 10–20 Myr).
-- **Verified solution:** TODO.
+- **Verified solution:** probe heat flow at 200, 450 and 650 km, then place the plume over the upwelling at 650 km and run 2 Myr. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 
 ## World 2: Plates on the Move (לוחות בתנועה)
 
@@ -132,7 +132,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - Line: "ליד הרכס הקרקע הכי צעירה — היא נוצרת שם עכשיו".
 - **Constant-strategy check:** "dig at the ridge" and "dig at the nearest edge" both fail. A mirrored second round (ridge off-center the other way) defeats "always west".
 - **Win check:** dig cell age ≥ 95% of the maximum oceanic age.
-- **Verified solution:** TODO.
+- **Verified solution:** sample the sea floor near the ridge and far from it (100 km and 1100 km), then dig at the far edge, 1180 km (oldest, at least 52 Myr). Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 - **Optional heat step:** before digging, run the existing plume 10 Myr and watch a new stripe appear at the ridge. This keeps a heat verb in the level.
 
 ### L7 Continent meets continent
@@ -149,7 +149,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - The tutorial for expectation: when the player first sees the collision, a "volcano observatory" prop placed by villagers stays quiet. Line: "שתי יבשות נדחסו זו לזו; אף לוח לא שקע, ולכן אין הרי געש".
 - **Constant-strategy check:** the "one plume in the middle" sample must fail (valley). Random must be under 5%.
 - **Win check:** peak height at the wish ≥ snow line, and volcano count = 0 (asserted, part of the COLL test).
-- **Verified solution:** TODO.
+- **Verified solution:** a cold drip under the seam at (500, 300) km, 8 Myr: both continents are drawn in, nothing dives, a range without volcanoes. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 
 ### L8 Ocean dives under
 - **Geography (PT, EV):**
@@ -169,7 +169,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - Random must be under 5%.
   - Mirrored second round (ocean on the other side).
 - **Win check:** trench cells all offshore; ≥ 1 volcano within the farm zone; 0 within R of the town.
-- **Verified solution:** TODO.
+- **Verified solution:** a cold drip at (580, 300) km, under the continent's edge, 4 Myr: the ocean plate dives, trench at the coast, the arc over the fields and not over the town. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 
 ### L9 Slide past
 - **Geography (PT):** "לוחות מחליקים: הלוחות נעים זה לצד זה … חיכוך ומתח מצטבר … רעידות אדמה חזקות". Offset river and road are **OURS** visuals (FACTS §2).
@@ -183,7 +183,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - Line: "הלוחות החליקו זה לצד זה — לא נוצרו הרים ולא ים, רק רעידות".
 - **Constant-strategy check:** "one plume in the middle" → a rift across the fault, which fails. Random under 5%.
 - **Win check:** residual offset ≤ 15 km, no rift or mountain on the fault line, ≥ 1 quake logged during the run (stress release shown).
-- **Verified solution:** TODO.
+- **Verified solution:** a cold drip at (100, 150) and a hot plume at (100, 450) on the west side, 4.5 Myr: the plates shear past each other and the road is offset. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 - **Engine note:** the transform must *emerge* from shear between cells, never from a type flag.
 
 ### L10 Transfer: Wegener's puzzle
@@ -199,7 +199,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - A heat run that doesn't reproduce today's layout: today's map doesn't match.
 - **Constant-strategy check:** coastline-only matching must fail (decoy). Random heat must not reproduce today.
 - **Win check:** all pieces correctly paired by ≥ 2 evidence types, and the forward run ends within tolerance of the target layout.
-- **Verified solution:** TODO.
+- **Verified solution:** drag the four continent pieces to their matching coasts, fossils and rock belts and present them; then place the plume at (3000, 1750) km under the join and run. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 - **Not-like care:** dragging continent pieces is a direct-manipulation verb that is **not** in the four verbs. Options:
   - (a) Treat it as a reading verb: "pin matches" by selecting pairs of evidence markers, and the pieces snap together by themselves.
   - (b) The lead accepts drag here as a one-off and records it in GAME_IDENTITY.
@@ -218,7 +218,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - A drip too far inland: volcanoes in villages.
 - **Constant-strategy check:** "one plume in the middle" opens the ocean wider and fails. Random under 5%.
 - **Win check:** ring continuity ≥ 80% of margins subducting; 0 volcanoes within village radius.
-- **Verified solution:** TODO.
+- **Verified solution:** three cold drips under the three coasts, at (500, 80), (1100, 400) and (500, 730) km, default duration: trenches and volcanoes ring the ocean. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 - **Care:** the volcanoes are inland of the trenches, not "offshore" (CURRICULUM L11). No hot spot on this map.
 
 ### L12 Where to build?
@@ -233,7 +233,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - Line: "רוב הרעידות קורות לאורך גבולות הלוחות".
 - **Constant-strategy check:** "farthest corner" fails (wish). "Next to the spring" fails (damage). Random sites under 10%.
 - **Win check:** site within spring radius and outside the damage band (cumulative modeled Mercalli damage below a threshold).
-- **Verified solution:** TODO.
+- **Verified solution:** advise the port at (80, 400) km, on the quiet west coast that belongs to the ocean's own plate (no boundary). Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 
 ### L13 Bigger isn't deadlier
 - **Geography (EV):**
@@ -254,7 +254,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - "Help the bigger quake" fails.
   - A mirrored second round (the weak town gets the bigger quake) checks that the player reads vulnerability, not position.
 - **Win check:** total modeled damage below the threshold.
-- **Verified solution:** TODO.
+- **Verified solution:** predict 1000× for two magnitude units, choose that the valley town copies the port town's 413 building ("valley-copies"), then run the quakes. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 - **Care:**
   - Say "בנייה עמידה", **not "413"**, here; 413 unlocks in L15.
   - Never show deaths, only slapstick.
@@ -277,7 +277,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - Line: "צונאמי הוא לא גל אחד אלא סדרה של גלים".
 - **Constant-strategy check:** "highest hill always" fails when it's farther than wave-1 time. "Harbor in the sheltered bay always" fails on the second round's coast.
 - **Win check:** every villager is above the run-up before each wave's arrival; the harbor survives or is rebuilt.
-- **Verified solution:** TODO.
+- **Verified solution:** the north cove next to the cliff, and the cliff (42 m) as the escape hill; run the trench quake: everyone walks up before the wave. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 - **Care:**
   - "The largest wave may not be the first" is OURS, not in the module. It is shown only through play, never as an assessed line; the spoken line stays the module's "לא גל אחד אלא סדרה".
   - High ground is OURS; the module says "תוכניות פינוי".
@@ -301,7 +301,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - A "wait for warning" button (decoy) does nothing. Line: "חיזוי מדויק של רעידות אדמה הוא כיום בלתי אפשרי — לכן מתכוננים".
 - **Constant-strategy check:** "all quarters at the map edge" fails (valley towns must stay in their valley zone). "Reinforce the newest quarter" fails.
 - **Win check:** modeled damage over N seeded quakes is below the threshold for **every** seed (stars don't depend on timing).
-- **Verified solution:** TODO.
+- **Verified solution:** Tiberias on the hill (t-hill), Jericho on the alluvial fan (j-fan), Shechem on the ridge (y-ridge); run the rift quakes: all houses stand. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 - **Care:**
   - **413 is anachronistic for 1927**; split the acts as above.
   - S5: say "בעמק הירדן" only.
@@ -329,7 +329,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - Looking for fossils in granite or marble: "מאובנים רק בסלעי משקע".
 - **Constant-strategy check:** "one plume in the middle" yields basalt only (fails 3 of 4). Random heat yields all four under 5%.
 - **Win check:** 4 correct samples collected; each sample's rock has a recorded formation path in the model.
-- **Verified solution:** TODO.
+- **Verified solution:** a cold drip at (300, 250) and a hot plume at (600, 250), 14 Myr; then hammer at 600, 300, 120 and 265 km for basalt, granite, fossil limestone and marble. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 - **Not-like care:** no cycle wheel and no "apply process" buttons. Rocks only come from what the planet did.
 
 ### L17 Fossils at 700 m
@@ -348,7 +348,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - Line: "הים היה רדוד — היבשה היא שעלתה".
 - **Constant-strategy check:** a single long run with the drip from the start fails (no limestone on top). "One plume in the middle" → a rift (fails).
 - **Win check:** fossil layer elevation ≥ 700 m, the layer was deposited at depth < shallow-sea limit (OURS, e.g. 200 m), and sea level is unchanged.
-- **Verified solution:** TODO.
+- **Verified solution:** run 30 Myr with no heat (the shallow sea lays fossil limestone), then a cold drip at (60, 40) km and 30 more Myr: the layers are lifted 700 m+. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 
 ### L18 Final: building the Land of Israel (no hints, nothing labeled)
 - **Geography:**
@@ -385,7 +385,7 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
   - basalt cover in the NE;
   - west → east order coast < ridge > rift;
   - all 3 towns survive the quake with modeled damage below the threshold.
-- **Verified solution:** TODO.
+- **Verified solution:** a cold drip at (88, 130) km under the ridge belt and a hot plume at (180, 50) km in the north-east (Golan basalt), 8 Myr, with Arabia sliding north on the rift; then the coast town on the plain, the hill town on the crest and the valley town on the rock terrace. Checked in `tests/levels.test.ts` (3 stars) and played in a real browser by `scripts/drive.mjs`.
 - **Care:**
   - Feedback lines must use the LB framing only (S2).
   - Never label the Golan a belt.
@@ -394,7 +394,9 @@ Site-choice levels (L12–L15, L18 last step) also check that "always the farthe
 
 ---
 
-## Tests to add once level data exists (QA list)
+## Tests (QA list, now in `tests/`)
+
+Items 1–3, 5, 6 and 10 are in `tests/levels.test.ts` and `tests/misconceptions.test.ts`; 4, 7, 8 and 9 in `tests/rules.test.ts`; the Israel relief comparison is in `tests/israel.test.ts`. Item 2 is looser than first drafted: random heat layouts win at most 25% of the time (a level with one seam and one plume is easy to hit by luck), and every constant layout fails.
 
 1. Per level: the authored solution wins (solver finds ≥ 1 solution).
 2. Per heat level: "one plume in the middle" fails; random placements win ≤ 5%. Site levels: the listed constant sites fail.

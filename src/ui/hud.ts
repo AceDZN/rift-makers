@@ -482,6 +482,12 @@ export class Hud {
     wrap.appendChild(worlds);
     const row = this.el('div', 'row');
     row.style.justifyContent = 'center';
+    // continue at the first open level without stars, else the last open one
+    const open = LEVELS.filter((l) => isUnlocked(g.progress, l.id));
+    const next = open.find((l) => !(g.progress.stars[l.id] ?? 0)) ?? open[open.length - 1];
+    const total = Object.values(g.progress.stars).reduce((a, b) => a + b, 0);
+    row.appendChild(this.el('span', 'total-stars', `<span aria-hidden="true">★</span> <span class="ltr">${total}/${LEVELS.length * 3}</span>`));
+    row.appendChild(this.button('btn primary big', `${total ? 'המשך' : 'מתחילים'} · שלב ${ltr(next.id)}`, () => g.startLevel(next.id)));
     row.appendChild(this.button('btn', g.audio.muted ? 'הפעלת צליל' : 'השתקה', () => g.toggleMute()));
     wrap.appendChild(row);
     this.root.appendChild(wrap);
