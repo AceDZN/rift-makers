@@ -70,7 +70,7 @@ export class Game {
     this.world.reducedMotion = this.reducedMotion;
     this.audio.setMuted(this.progress.settings.muted);
     this.world.root.add(this.extra);
-    preloadModels(['pebble', 'house', 'house413', 'boat', 'olive', 'cypress']);
+    preloadModels(['pebble', 'house', 'house413', 'boat', 'olive', 'cypress', 'dog', 'seismograph', 'observatory']);
     this.bindInput();
   }
 
@@ -400,6 +400,7 @@ export class Game {
       this.addActor('pebble', vh, 820, 420, { yaw: -0.6 });
       this.label('הזמנה: בזלת, גרניט, גיר, שיש', this.kmPoint(820, 420, 0.7), 'bubble');
     }
+    this.buildProps();
     if (d.wegener) this.buildPieces();
     if (d.kind === 'heat' || d.kind === 'predict' || d.kind === 'rocks' || d.kind === 'israel' || d.kind === 'fossil') {
       // a compass on the slab: north up (away), east right
@@ -413,6 +414,49 @@ export class Game {
     if (d.kind === 'site' && d.site?.kind === 'tsunami') this.buildTsunamiPins();
     if (d.kind === 'israel') this.buildSitePins();
     this.placeActors();
+  }
+
+  /** Instruments and landmarks that belong to a level's story (Tripo models). */
+  private buildProps() {
+    const d = this.session!.def;
+    const unit = this.slab!.S;
+    const near = (x: number, z: number, dx: number, dz: number) => [x + dx / unit, z + dz / unit] as const;
+    if (d.fields) {
+      // volcano observatory beside the town, watching the arc
+      const [x, z] = near(d.fields.town.x, d.fields.town.z, 0.35, -0.55);
+      this.addActor('observatory', 0.42, x, z, { yaw: -2.2 });
+    }
+    if (d.ring) {
+      const v0 = d.ring.villages[1];
+      const [x, z] = near(v0.x, v0.z, -0.1, 0.5);
+      this.addActor('observatory', 0.42, x, z, { yaw: -1.6 });
+    }
+    if (d.copy) {
+      for (const t of d.copy.towns) {
+        const [x, z] = near(t.x, t.z, -0.7, -0.35);
+        this.addActor('seismograph', 0.3, x, z, { yaw: 0.6 });
+      }
+      this.addDog(d.copy.towns[1].x, d.copy.towns[1].z + 0.45 / unit);
+    }
+    if (d.kind === 'site' && d.site?.kind === 'quakes') {
+      this.addActor('seismograph', 0.3, 300 + 0.5 / unit, 30 + 0.4 / unit, { yaw: 0.4 });
+    }
+    if (d.site?.kind === 'tsunami') {
+      const cliff = d.site.hills!.find((h) => h.id === 'cliff') ?? d.site.hills![0];
+      this.addActor('warning_tower', 0.6, cliff.x + 0.2, cliff.z + 0.2, { yaw: -1.4 });
+    }
+    if (d.kind === 'site' && d.site?.kind === 'rebuild') {
+      this.addActor('seismograph', 0.3, 96, 60, { yaw: 0.8 });
+      this.addDog(100, 158);
+    }
+    if (d.kind === 'fossil') this.addActor('ammonite', 0.22, 104 + 0.35 / unit, 40 + 0.2 / unit, { yaw: 0.7 });
+    if (d.kind === 'israel') this.addActor('hot_spring', 0.22, 136, 128, { yaw: 0.3 });
+  }
+
+  /** The dog feels a quake first: it bolts when the ground shakes. */
+  private addDog(x: number, z: number) {
+    const dog = this.addActor('dog', 0.2, x, z, { faceYaw: Math.PI / 2, yaw: 0.8 });
+    dog.group.userData.dog = true;
   }
 
   /** Keep villagers and houses riding the ground as it moves and rises. */
@@ -577,6 +621,7 @@ export class Game {
           el.setAttribute('aria-hidden', 'true');
         }
         for (const a of this.villagerActors.values()) a.play('panic');
+        for (const a of this.actors) if (a.group.userData.dog) a.play('walk', { speed: 2.2 });
         window.setTimeout(() => {
           if (!this.session?.outcome) for (const a of this.villagerActors.values()) a.play('idle');
         }, 1400);

@@ -474,7 +474,9 @@ export class SlabView {
       const z = rnd() * this.D;
       const k = Math.round((z / t.depthKm) * (t.nz - 1)) * t.nx + Math.round((x / t.widthKm) * (t.nx - 1));
       const mat = t.mat[k];
-      if ((mat !== MAT.grass && mat !== MAT.fertile) || !Number.isNaN(t.water[k]) || t.elev[k] > 2200 || t.elev[k] < 2) continue;
+      const scrub = mat === MAT.limestone; // olive and oak scrub on the limestone hills, thinner
+      if ((mat !== MAT.grass && mat !== MAT.fertile && !scrub) || !Number.isNaN(t.water[k]) || t.elev[k] > 2200 || t.elev[k] < 2) continue;
+      if (scrub && rnd() < 0.55) continue;
       // clumps: keep a tree only where low-frequency noise says forest
       if (Math.sin(x * 0.013 + this.def.id) * Math.cos(z * 0.017) < 0.15) continue;
       const p = this.toWorld(x, z);
