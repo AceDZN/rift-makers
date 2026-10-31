@@ -160,14 +160,14 @@ void main() {
   if (vWet < 0.5) discard;
   vec3 shallow = vec3(0.18, 0.80, 0.82);
   vec3 deep = vec3(0.02, 0.16, 0.42);
-  float k = clamp(vDepth / 0.9, 0.0, 1.0);
+  float k = clamp(vDepth / 3.0, 0.0, 1.0);
   vec3 c = mix(shallow, deep, pow(k, 0.6));
   vec3 v = normalize(uCam - vWorld);
   float fres = pow(1.0 - max(v.y, 0.0), 3.0);
   c = mix(c, vec3(0.75, 0.88, 1.0), fres * 0.35);
   float sparkle = pow(max(0.0, sin(vWorld.x * 18.0 + uTime * 2.0) * sin(vWorld.z * 15.0 - uTime * 1.7)), 12.0);
   c += sparkle * 0.35;
-  float foam = 1.0 - smoothstep(0.0, 0.06, vDepth);
+  float foam = 1.0 - smoothstep(0.0, 0.012, vDepth);
   c = mix(c, vec3(0.95, 0.98, 1.0), foam * 0.7);
   gl_FragColor = vec4(c, mix(0.72, 0.9, k));
   #include <colorspace_fragment>
@@ -432,7 +432,7 @@ export class SlabView {
         const isWet = !Number.isNaN(w);
         wet.setX(k, isWet ? 1 : 0);
         wpos.setY(k, (isWet ? w : Math.max(e, 0)) * this.yPerM + 0.004);
-        depth.setX(k, isWet ? (w - e) * this.yPerM : 0);
+        depth.setX(k, isWet ? (w - e) / 1000 : 0); // km of water
       }
     }
     // a wet vertex next to dry ones keeps the shore crisp

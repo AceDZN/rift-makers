@@ -335,9 +335,9 @@ export class Game {
       for (let i = 0; i < 2; i++) {
         const ang = i * 2.4 + vl.x;
         const r = 0.45 / unit;
-        this.addActor('house', 0.26, vl.x + Math.cos(ang) * r, vl.z + Math.sin(ang) * r, { yaw: ang });
+        this.addActor('house', 0.26, vl.x + Math.cos(ang) * r, vl.z + Math.sin(ang) * r, { yaw: ang }).group.userData.carry = true;
       }
-      this.addActor(Math.random() < 0.5 ? 'olive' : 'cypress', 0.3, vl.x - 0.3 / unit, vl.z + 0.25 / unit);
+      this.addActor(Math.random() < 0.5 ? 'olive' : 'cypress', 0.3, vl.x - 0.3 / unit, vl.z + 0.25 / unit).group.userData.carry = true;
     }
     if (d.fields) {
       const t = d.fields.town;
@@ -431,7 +431,11 @@ export class Game {
       if (a.group.userData.villager) continue;
       const km = a.group.userData.km as Vec2 | undefined;
       if (!km || a.id === 'boat') continue;
-      // houses and trees ride their plate like the villagers do
+      // a village's houses and trees ride its plate like the villagers do
+      if (!a.group.userData.carry) {
+        a.group.position.y = slab.surfaceY(km.x, km.z);
+        continue;
+      }
       const p = s.villagerPos(km);
       const w = slab.toWorld(p.x, p.z);
       a.group.position.set(w.x, slab.surfaceY(p.x, p.z), w.z);
@@ -760,7 +764,9 @@ export class Game {
       l.el.style.display = '';
       l.el.style.left = `${((q.x + 1) / 2) * w}px`;
       l.el.style.top = `${((1 - q.y) / 2) * h}px`;
+      l.el.style.marginTop = '0px';
     }
+    this.declutterLabels();
     // selection state on pins
     const s = this.session;
     if (!s) return;
@@ -770,6 +776,24 @@ export class Game {
       if (ds.cove) l.el.classList.toggle('sel', s.cove === ds.cove);
       if (ds.hill) l.el.classList.toggle('sel', s.hill === ds.hill);
       if (ds.villager && s.phase !== 'plan') l.el.style.opacity = '0';
+    }
+  }
+
+  /** Pins that would overlap stack upward instead, nearest the camera first. */
+  private declutterLabels() {
+    const shown = this.labels.filter((l) => l.el.style.display !== 'none');
+    const boxes = shown.map((l) => ({ l, r: l.el.getBoundingClientRect() }));
+    boxes.sort((a, b) => b.r.bottom - a.r.bottom);
+    const placed: { left: number; right: number; top: number; bottom: number }[] = [];
+    for (const { l, r } of boxes) {
+      let dy = 0;
+      for (let k = 0; k < 10; k++) {
+        const hit = placed.find((o) => r.left < o.right + 2 && r.right > o.left - 2 && r.top + dy < o.bottom + 2 && r.bottom + dy > o.top - 2);
+        if (!hit) break;
+        dy = hit.top - 3 - r.bottom;
+      }
+      if (dy) l.el.style.marginTop = `${dy}px`;
+      placed.push({ left: r.left, right: r.right, top: r.top + dy, bottom: r.bottom + dy });
     }
   }
 

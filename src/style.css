@@ -496,6 +496,29 @@ button:disabled {
   padding: 16px;
 }
 
+.overlay.aside {
+  background: transparent;
+  align-items: end;
+  padding-bottom: 104px;
+  pointer-events: none;
+}
+
+.overlay.aside .card {
+  pointer-events: auto;
+}
+
+/* wide screens: the result sits beside the landscape, not on it */
+@media (min-width: 1000px) and (min-aspect-ratio: 4/3) {
+  .overlay.aside {
+    justify-items: start;
+    align-items: center;
+    padding: 90px 16px 104px;
+  }
+  .overlay.aside .card {
+    max-width: 360px;
+  }
+}
+
 .card {
   background: linear-gradient(180deg, rgba(30, 36, 76, 0.97), rgba(16, 20, 44, 0.97));
   border: 2px solid var(--line);
@@ -771,6 +794,32 @@ button:disabled {
     height: 40px;
   }
   .rbtn .cap {
+    display: none;
+  }
+  /* buttons stack down the left edge so the title keeps its width */
+  .round-btns {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .title-card {
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+  }
+  .card {
+    padding: 16px 18px;
+  }
+  .card p {
+    font-size: 15px;
+  }
+  .card .bigstars {
+    font-size: 28px;
+  }
+  .overlay.aside {
+    padding-bottom: 12px;
+  }
+  /* on a phone the pins on the map are the choices; the panel keeps only what is picked */
+  .choices .choice:not(.sel) {
     display: none;
   }
   .tool {

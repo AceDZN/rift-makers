@@ -414,9 +414,7 @@ export class Hud {
     row.appendChild(this.button('btn', 'לבחירת שלב', () => g.exitToSelect()));
     c.appendChild(row);
     // the result stays readable: put the card low so the landscape shows
-    const o = this.el('div', 'overlay');
-    o.style.alignItems = 'end';
-    o.style.background = 'transparent';
+    const o = this.el('div', 'overlay aside');
     o.appendChild(c);
     this.root.appendChild(o);
     (row.firstElementChild as HTMLButtonElement)?.focus({ preventScroll: true });
@@ -432,9 +430,7 @@ export class Hud {
     row.appendChild(this.button('btn primary', 'התחילו מחדש', () => g.restart()));
     row.appendChild(this.button('btn', 'לבחירת שלב', () => g.exitToSelect()));
     c.appendChild(row);
-    const o = this.el('div', 'overlay');
-    o.style.alignItems = 'end';
-    o.style.background = 'transparent';
+    const o = this.el('div', 'overlay aside');
     o.appendChild(c);
     this.root.appendChild(o);
     (row.firstElementChild as HTMLButtonElement)?.focus({ preventScroll: true });
