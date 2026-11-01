@@ -1,7 +1,7 @@
 import './style.css';
 import { Game } from './game/game.ts';
 import { Hud } from './ui/hud.ts';
-import { initHost, parseLevelParam, postToHost } from './host.ts';
+import { initHost, parseLevelParam } from './host.ts';
 import { LEVELS } from './model/levels.ts';
 import { COMMISSION_BASE_ID, COMMISSION_LEVELS } from './model/commissions.ts';
 
@@ -52,4 +52,8 @@ function loop(now: number) {
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
-postToHost({ type: 'ready' });
+
+// The workbook page hears `ready` once the models are in and the first scene has drawn.
+void game.modelsReady
+  .then(() => game.actorsReady())
+  .then(() => requestAnimationFrame(() => requestAnimationFrame(() => game.announceReady())));

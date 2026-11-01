@@ -30,10 +30,18 @@ npm run preview
 
 `npm run build` makes an offline static site in `dist/` (relative paths, no backend, no analytics, no keys). `npm run preview` serves it on port 4243.
 
-To replay every level in a real browser through the game controller and save screenshots (needs the dev server running):
+To replay every level in a real browser through the game controller and save screenshots to the git-ignored `docs/screenshots/` (needs the dev server running):
 
 ```bash
 node scripts/drive.mjs http://localhost:5243 docs/screenshots
+```
+
+## Workbook embed
+
+Inside the Workbook geography games player (an iframe on `*.workbook.co.il`), `src/host.ts` posts `ready` once the models are loaded and the first scene has drawn, then `level-start` and `level-complete` (with stars and duration) for the 18 authored levels; standalone it posts nothing. `?level=N` opens level N even if it is locked. The catalog sheet and poster are in `workbook/`. To check the bridge in a real embed (serves `dist/` from a sub-path):
+
+```bash
+npm run build && npm run embed
 ```
 
 ## Controls

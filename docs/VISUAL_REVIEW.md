@@ -1,6 +1,6 @@
 # Visual review: real captures against the targets
 
-Captures are real browser screenshots at 1280×800 (and 375×740 for phone checks), made by `scripts/drive.mjs`, which plays each level through the game controller. Targets are the generated mockups in `docs/visual-targets/` (design targets, not screenshots). Checklist: `docs/visual-targets/CHECKLIST.md`.
+Captures are real browser screenshots at 1280×800 (and 375×740 for phone checks), made by `scripts/drive.mjs`, which plays each level through the game controller. They are local only: `docs/screenshots/` is git-ignored, so run the script to make them. Targets are the generated mockups in `docs/visual-targets/` (design targets, not screenshots). Checklist: `docs/visual-targets/CHECKLIST.md`.
 
 Verdicts: **match** (reads the same), **partial** (the idea is there, the finish is not), **gap** (missing).
 

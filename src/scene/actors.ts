@@ -53,8 +53,8 @@ async function load(id: ModelId): Promise<{ gltf: GLTF; entry: ManifestEntry } |
   return gltf ? { gltf, entry } : null;
 }
 
-export function preloadModels(ids: ModelId[]) {
-  for (const id of ids) void load(id);
+export function preloadModels(ids: ModelId[]): Promise<void> {
+  return Promise.all(ids.map((id) => load(id))).then(() => undefined);
 }
 
 /** A placed model; rigged ones animate through `play`. */

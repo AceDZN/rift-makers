@@ -55,6 +55,11 @@ export class Game {
   private terrainKey = '';
   private lastTerrainAt = 0;
   private startedAt = 0;
+  /** Resolves when the common models are loaded (or failed and fell back). */
+  readonly modelsReady: Promise<void>;
+  // The workbook host hears about authored levels only, and nothing before `ready`.
+  private hostReady = false;
+  private hostPending: number | null = null;
   private recorded = false;
   private wave: THREE.Mesh | null = null;
   private waveT = -1;
@@ -70,7 +75,7 @@ export class Game {
     this.world.reducedMotion = this.reducedMotion;
     this.audio.setMuted(this.progress.settings.muted);
     this.world.root.add(this.extra);
-    preloadModels(['pebble', 'house', 'house413', 'boat', 'olive', 'cypress', 'dog', 'seismograph', 'observatory']);
+    this.modelsReady = preloadModels(['pebble', 'house', 'house413', 'boat', 'olive', 'cypress', 'dog', 'seismograph', 'observatory']);
     this.bindInput();
   }
 
@@ -113,8 +118,25 @@ export class Game {
       this.buildLevelActors();
       this.syncHeats(); // heat already burning in the level is drawn from the start
     }
-    postToHost({ type: 'level-start', level: id });
+    if (id <= LEVELS.length) {
+      if (this.hostReady) postToHost({ type: 'level-start', level: id });
+      else this.hostPending = id;
+    }
     this.touch();
+  }
+
+  /** Every actor of the current scene has its model (or its stand-in). */
+  actorsReady(): Promise<void> {
+    return Promise.all(this.actors.map((a) => a.ready)).then(() => undefined);
+  }
+
+  /** Tell the workbook page the game is playable, then which level is open. */
+  announceReady() {
+    if (this.hostReady) return;
+    this.hostReady = true;
+    postToHost({ type: 'ready' });
+    if (this.hostPending !== null) postToHost({ type: 'level-start', level: this.hostPending });
+    this.hostPending = null;
   }
 
   exitToSelect() {
@@ -729,7 +751,7 @@ export class Game {
     if (!this.recorded && s.outcome) {
       this.recorded = true;
       recordResult(this.progress, { level: d.id, unaided: s.unaided, hinted: s.hints > 0, mistakes: s.mistakes, stars: s.outcome.stars, at: Date.now() });
-      postToHost({ type: 'level-complete', level: d.id, stars: s.outcome.stars, durationMs: Math.round(performance.now() - this.startedAt) });
+      if (d.id <= LEVELS.length) postToHost({ type: 'level-complete', level: d.id, stars: s.outcome.stars, durationMs: Math.round(performance.now() - this.startedAt) });
     }
   }
 
